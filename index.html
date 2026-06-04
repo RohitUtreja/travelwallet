@@ -123,7 +123,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 // ── CONSTANTS (frozen to prevent mutation) ────────────────────────────────
 var CATS=Object.freeze([
   {id:'rent',label:'Rent',icon:'🏠',color:'#ffe6a0'},
-  {id:'food',label:'Food & Drinks',icon:'🍽️',color:'#FF6B6B'},
+  {id:'groceries',label:'Groceries',icon:'🛒',color:'#6EE7B7'},
+  {id:'eatingout',label:'Eating Out',icon:'🍴',color:'#FF6B6B'},
   {id:'transport',label:'Public Transport',icon:'🚌',color:'#4ECDC4'},
   {id:'car',label:'Car',icon:'🚗',color:'#FFE66D'},
   {id:'taxi',label:'Taxi / Ride',icon:'🛺',color:'#FF9F43'},  
@@ -323,7 +324,7 @@ function onContentChange(e){
 }
 function onContentInput(e){
   var t=e.target;
-  if(t.id==='inp-amt'){form.amount = t.value.replace(/,/g, '');return;}
+  if(t.id==='inp-amt'){form.amount=t.value;return;}
   if(t.id==='inp-note'){form.note=t.value.slice(0,MAX_NOTE);return;}
 }
 
@@ -353,8 +354,20 @@ function buildAdd(){
     (recent?'<div class="sp"></div><div class="stitle">Recent Entries</div>'+recent:'');
 }
 
+function parseAmt(val){
+  var s=String(val).trim();
+  if(s.includes(',')&&s.includes('.')){
+    // both separators: whichever is last is the decimal
+    s=s.lastIndexOf(',')>s.lastIndexOf('.')?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');
+  }else if(s.includes(',')){
+    var parts=s.split(',');
+    // comma is decimal if exactly one comma and ≤2 digits after it
+    s=(parts.length===2&&parts[1].length<=2)?s.replace(',','.'):s.replace(/,/g,'');
+  }
+  return Math.round(parseFloat(s)*100)/100;
+}
 function addExpense(){
-  var amt=Math.round(parseFloat(String(form.amount).replace(/,/g, ''))*100)/100;
+  var amt=parseAmt(form.amount);
   if(!form.amount||isNaN(amt)||amt<=0){showToast('Enter a valid amount ✕');return;}
   if(amt>MAX_AMT){showToast('Amount too large ✕');return;}
   if(!DATE_RE.test(form.date)){showToast('Invalid date ✕');return;}
