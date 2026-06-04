@@ -323,7 +323,7 @@ function onContentChange(e){
 }
 function onContentInput(e){
   var t=e.target;
-  if(t.id==='inp-amt'){form.amount=t.value;return;}
+  if(t.id==='inp-amt'){form.amount = t.value.replace(/,/g, '');return;}
   if(t.id==='inp-note'){form.note=t.value.slice(0,MAX_NOTE);return;}
 }
 
@@ -343,7 +343,7 @@ function buildAdd(){
   var recent=expenses.slice(0,5).map(buildRow).join('');
   return '<div class="card"><div class="clbl">Category</div><div class="catg">'+cats+'</div></div>'+
     '<div class="card"><div class="clbl">Amount</div><div class="irow">'+
-    '<input class="inp" id="inp-amt" type="number" inputmode="decimal" placeholder="0.00" value="'+h(form.amount)+'" autocomplete="off">'+
+    '<input class="inp" id="inp-amt" type="text" inputmode="decimal" placeholder="0.00" value="'+h(form.amount)+'" autocomplete="off">'+
     '<select class="inp" id="inp-cur" style="width:90px;flex-shrink:0">'+copts+'</select></div></div>'+
     '<div class="card"><div class="clbl">Date</div>'+
     '<input class="inp sm" id="inp-date" type="date" value="'+h(form.date)+'" style="font-size:15px;font-weight:600"></div>'+
@@ -354,7 +354,7 @@ function buildAdd(){
 }
 
 function addExpense(){
-  var amt=Math.round(parseFloat(form.amount)*100)/100;
+  var amt=Math.round(parseFloat(String(form.amount).replace(/,/g, ''))*100)/100;
   if(!form.amount||isNaN(amt)||amt<=0){showToast('Enter a valid amount ✕');return;}
   if(amt>MAX_AMT){showToast('Amount too large ✕');return;}
   if(!DATE_RE.test(form.date)){showToast('Invalid date ✕');return;}
