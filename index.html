@@ -127,7 +127,7 @@ var CATS=Object.freeze([
   {id:'eatingout',label:'Eating Out',icon:'🍴',color:'#FF6B6B'},
   {id:'transport',label:'Public Transport',icon:'🚌',color:'#4ECDC4'},
   {id:'car',label:'Car',icon:'🚗',color:'#FFE66D'},
-  {id:'taxi',label:'Taxi / Ride',icon:'🛺',color:'#FF9F43'},  
+  {id:'taxi',label:'Taxi / Ride',icon:'🛺',color:'#FF9F43'},
   {id:'shopping',label:'Shopping',icon:'🛍️',color:'#F97316'},
   {id:'fuel',label:'Fuel',icon:'⛽',color:'#FBBF24'},
   {id:'medical',label:'Medical',icon:'💊',color:'#F472B6'},
@@ -141,8 +141,13 @@ var CATS=Object.freeze([
   {id:'insurance',label:'Insurance',icon:'🛡️',color:'#A78BFA'},
   {id:'other',label:'Other',icon:'📦',color:'#94A3B8'}
 ]);
+// Legacy category IDs that no longer appear in the picker but must stay valid
+// so old saved expenses load correctly instead of falling back to 'other'
+var LEGACY_CATS=Object.freeze([
+  {id:'food',label:'Food & Drinks',icon:'🍽️',color:'#FF6B6B'}
+]);
 var CURRENCIES=Object.freeze(['EUR','USD','GBP','JPY','CAD','AUD','CHF','SGD','AED','TRY']);
-var VALID_CATS=new Set(CATS.map(function(c){return c.id;}));
+var VALID_CATS=new Set(CATS.concat(Array.prototype.slice.call(LEGACY_CATS)).map(function(c){return c.id;}));
 var VALID_CURR=new Set(CURRENCIES);
 var DATE_RE=/^\d{4}-\d{2}-\d{2}$/;
 var MAX_NOTE=200;
@@ -228,7 +233,7 @@ function fmt(a,c){
 function fmtDate(d){return new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
 function fmtShort(d){return new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});}
 function dow(d){return new Date(d+'T00:00:00').toLocaleDateString('en-US',{weekday:'short'});}
-function getCat(id){return CATS.find(function(c){return c.id===id;})||CATS[CATS.length-1];}
+function getCat(id){return CATS.find(function(c){return c.id===id;})||LEGACY_CATS.find(function(c){return c.id===id;})||CATS[CATS.length-1];}
 function genId(){
   // Crypto random — not guessable like Date.now()+Math.random()
   var a=crypto.getRandomValues(new Uint32Array(3));
