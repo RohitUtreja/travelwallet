@@ -79,6 +79,32 @@
   .page-container {
     @apply min-h-dvh bg-bg flex flex-col max-w-lg mx-auto;
   }
+
+  .avatar {
+    @apply rounded-full flex items-center justify-center font-bold flex-shrink-0 border-2 border-bg;
+  }
+
+  .section-label {
+    @apply text-muted text-xs font-semibold uppercase tracking-wider;
+  }
+
+  .amount-display {
+    @apply font-mono font-bold tabular-nums;
+  }
+
+  .balance-positive {
+    @apply font-bold;
+    color: #00D4AA;
+  }
+
+  .balance-negative {
+    @apply font-bold;
+    color: #FF6B6B;
+  }
+
+  .chip {
+    @apply px-3 py-1 rounded-full text-xs font-semibold border border-border bg-surface2 text-muted;
+  }
 }
 
 @keyframes slide-down {
@@ -103,4 +129,19 @@
 
 .animate-fade-in {
   animation: fade-in 0.3s ease-out both;
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.25s ease-out both;
 }

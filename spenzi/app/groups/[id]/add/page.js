@@ -122,45 +122,41 @@ export default function AddExpensePage() {
       <Toast toasts={toasts} />
 
       {/* Header */}
-      <header className="flex items-center gap-3 px-5 pt-6 pb-4 safe-area-top border-b border-border/50 sticky top-0 z-30 bg-bg">
+      <header className="flex items-center gap-3 px-5 pt-6 pb-4 safe-area-top border-b border-[#1e2a40]/50 sticky top-0 z-30 bg-[#0A0E1A]">
         <button
           onClick={() => router.back()}
-          className="w-9 h-9 rounded-xl bg-surface2 border border-border flex items-center justify-center flex-shrink-0"
+          className="w-10 h-10 rounded-xl bg-[#1a2234] border border-[#1e2a40] flex items-center justify-center flex-shrink-0 min-h-[44px]"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8F0FE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F1F5F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
         </button>
-        <h1 className="text-lg font-bold text-textprimary">Add Expense</h1>
+        <h1 className="text-lg font-bold text-[#F1F5F9]">Add Expense</h1>
         {group && (
-          <span className="ml-auto text-xs text-muted bg-surface2 border border-border px-2 py-1 rounded-full">
-            {group.currency}
-          </span>
+          <span className="ml-auto chip">{group.currency}</span>
         )}
       </header>
 
       <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-        <div className="flex flex-col gap-6 px-5 py-6">
+        <div className="flex flex-col gap-6 px-5 py-6 pb-[calc(80px+env(safe-area-inset-bottom))]">
 
-          {/* Category grid */}
+          {/* Category grid — colored border+tint on selected */}
           <div className="flex flex-col gap-2">
-            <label className="text-muted text-xs font-semibold uppercase tracking-wider">
-              Category
-            </label>
+            <label className="section-label">Category</label>
             <div className="grid grid-cols-4 gap-2">
               {categoryList.map(([key, cat]) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => setCategory(key)}
-                  className={`flex flex-col items-center gap-1 py-3 rounded-xl border transition-all ${
+                  className={`flex flex-col items-center gap-1 py-3 rounded-xl border-2 transition-all ${
                     category === key
-                      ? 'border-accent/60 bg-accent/10'
-                      : 'border-border bg-surface2'
+                      ? 'border-[#00D4AA] bg-[#00D4AA]/10'
+                      : 'border-[#1e2a40] bg-[#1a2234]'
                   }`}
                 >
                   <span className="text-xl">{cat.emoji}</span>
-                  <span className={`text-xs font-medium ${category === key ? 'text-accent' : 'text-muted'}`}>
+                  <span className={`text-xs font-medium ${category === key ? 'text-[#00D4AA]' : 'text-[#64748B]'}`}>
                     {cat.label}
                   </span>
                 </button>
@@ -168,11 +164,25 @@ export default function AddExpensePage() {
             </div>
           </div>
 
+          {/* Amount — large centered mono font */}
+          <div className="flex flex-col gap-2 items-center">
+            <label className="section-label self-start">
+              Amount {group?.currency && <span className="normal-case">({group.currency})</span>}
+            </label>
+            <input
+              type="text"
+              inputMode="decimal"
+              className="w-full bg-[#1a2234] border border-[#1e2a40] rounded-2xl px-4 py-4 text-[#F1F5F9] text-4xl font-mono font-bold text-center outline-none focus:border-[#00D4AA]/60 transition-colors placeholder-[#64748B]/40"
+              placeholder="0.00"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+            />
+          </div>
+
           {/* Description */}
           <div className="flex flex-col gap-2">
-            <label className="text-muted text-xs font-semibold uppercase tracking-wider">
-              Description
-            </label>
+            <label className="section-label">Description</label>
             <input
               type="text"
               className="input-field"
@@ -183,27 +193,9 @@ export default function AddExpensePage() {
             />
           </div>
 
-          {/* Amount */}
-          <div className="flex flex-col gap-2">
-            <label className="text-muted text-xs font-semibold uppercase tracking-wider">
-              Amount {group?.currency && <span className="normal-case">({group.currency})</span>}
-            </label>
-            <input
-              type="text"
-              inputMode="decimal"
-              className="input-field text-2xl font-bold"
-              placeholder="0.00"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              required
-            />
-          </div>
-
           {/* Date */}
           <div className="flex flex-col gap-2">
-            <label className="text-muted text-xs font-semibold uppercase tracking-wider">
-              Date
-            </label>
+            <label className="section-label">Date</label>
             <input
               type="date"
               className="input-field"
@@ -215,17 +207,15 @@ export default function AddExpensePage() {
 
           {/* Paid by */}
           <div className="flex flex-col gap-2">
-            <label className="text-muted text-xs font-semibold uppercase tracking-wider">
-              Paid by
-            </label>
+            <label className="section-label">Paid by</label>
             <div className="flex flex-col gap-2">
               {members.map((m) => (
                 <button
                   key={m.user_id}
                   type="button"
                   onClick={() => setPaidBy(m.user_id)}
-                  className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
-                    paidBy === m.user_id ? 'border-accent/60 bg-accent/10' : 'border-border bg-surface2'
+                  className={`flex items-center gap-3 p-3 rounded-xl border transition-all min-h-[44px] ${
+                    paidBy === m.user_id ? 'border-[#00D4AA]/60 bg-[#00D4AA]/10' : 'border-[#1e2a40] bg-[#1a2234]'
                   }`}
                 >
                   <div
@@ -234,7 +224,7 @@ export default function AddExpensePage() {
                   >
                     {getInitial(m.profiles?.name ?? '')}
                   </div>
-                  <span className={`text-sm font-medium ${paidBy === m.user_id ? 'text-accent' : 'text-textprimary'}`}>
+                  <span className={`text-sm font-medium ${paidBy === m.user_id ? 'text-[#00D4AA]' : 'text-[#F1F5F9]'}`}>
                     {m.profiles?.name ?? 'Unknown'}
                     {m.user_id === currentUser?.id ? ' (you)' : ''}
                   </span>
@@ -248,35 +238,41 @@ export default function AddExpensePage() {
             </div>
           </div>
 
-          {/* Split */}
+          {/* Split — EQUAL|CUSTOM chips */}
           <div className="flex flex-col gap-2">
-            <label className="text-muted text-xs font-semibold uppercase tracking-wider">
-              Split
-            </label>
+            <label className="section-label">Split</label>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setSplitMode('equal')}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
-                  splitMode === 'equal' ? 'bg-accent text-bg border-accent' : 'bg-surface2 text-muted border-border'
+                className={`flex-1 py-2.5 rounded-full text-sm font-semibold border transition-all min-h-[44px] ${
+                  splitMode === 'equal' ? 'bg-[#00D4AA] text-[#0A0E1A] border-[#00D4AA]' : 'bg-[#1a2234] text-[#64748B] border-[#1e2a40]'
                 }`}
               >
-                Equal split
+                EQUAL
               </button>
               <button
                 type="button"
                 onClick={() => setSplitMode('custom')}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
-                  splitMode === 'custom' ? 'bg-accent text-bg border-accent' : 'bg-surface2 text-muted border-border'
+                className={`flex-1 py-2.5 rounded-full text-sm font-semibold border transition-all min-h-[44px] ${
+                  splitMode === 'custom' ? 'bg-[#00D4AA] text-[#0A0E1A] border-[#00D4AA]' : 'bg-[#1a2234] text-[#64748B] border-[#1e2a40]'
                 }`}
               >
-                Custom
+                CUSTOM
               </button>
             </div>
 
+            {/* Per-person preview */}
+            {amount && effectiveSplitMembers.length > 0 && (
+              <p className="text-[#64748B] text-xs text-center mt-1">
+                {group?.currency} {(parseAmount(amount) / effectiveSplitMembers.length).toFixed(2)} per person
+                ({effectiveSplitMembers.length} {effectiveSplitMembers.length === 1 ? 'person' : 'people'})
+              </p>
+            )}
+
             {splitMode === 'custom' && (
               <div className="flex flex-col gap-2 mt-1">
-                <p className="text-muted text-xs">Select who to split with:</p>
+                <p className="text-[#64748B] text-xs">Select who to split with:</p>
                 {members.map((m) => {
                   const isSelected = customSplitMembers.includes(m.user_id)
                   return (
@@ -284,8 +280,8 @@ export default function AddExpensePage() {
                       key={m.user_id}
                       type="button"
                       onClick={() => toggleCustomMember(m.user_id)}
-                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
-                        isSelected ? 'border-accent/60 bg-accent/10' : 'border-border bg-surface2'
+                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all min-h-[44px] ${
+                        isSelected ? 'border-[#00D4AA]/60 bg-[#00D4AA]/10' : 'border-[#1e2a40] bg-[#1a2234]'
                       }`}
                     >
                       <div
@@ -294,7 +290,7 @@ export default function AddExpensePage() {
                       >
                         {getInitial(m.profiles?.name ?? '')}
                       </div>
-                      <span className={`text-sm font-medium ${isSelected ? 'text-accent' : 'text-textprimary'}`}>
+                      <span className={`text-sm font-medium ${isSelected ? 'text-[#00D4AA]' : 'text-[#F1F5F9]'}`}>
                         {m.profiles?.name ?? 'Unknown'}
                       </span>
                       {isSelected && (
@@ -305,26 +301,13 @@ export default function AddExpensePage() {
                     </button>
                   )
                 })}
-                {amount && effectiveSplitMembers.length > 0 && (
-                  <p className="text-muted text-xs text-center">
-                    {group?.currency} {(parseAmount(amount) / effectiveSplitMembers.length).toFixed(2)} per person
-                    ({effectiveSplitMembers.length} {effectiveSplitMembers.length === 1 ? 'person' : 'people'})
-                  </p>
-                )}
               </div>
-            )}
-
-            {splitMode === 'equal' && amount && members.length > 0 && (
-              <p className="text-muted text-xs text-center mt-1">
-                {group?.currency} {(parseAmount(amount) / members.length).toFixed(2)} per person
-                ({members.length} people)
-              </p>
             )}
           </div>
         </div>
 
-        {/* Submit */}
-        <div className="px-5 pb-10">
+        {/* Submit — fixed at bottom */}
+        <div className="px-5 pb-8 sticky bottom-0 bg-[#0A0E1A] border-t border-[#1e2a40]/50 pt-4">
           <button
             type="submit"
             disabled={loading || !amount || effectiveSplitMembers.length === 0}

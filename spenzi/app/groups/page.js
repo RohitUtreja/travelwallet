@@ -123,14 +123,14 @@ export default function GroupsPage() {
       <Toast toasts={toasts} />
 
       {/* Header */}
-      <header className="flex items-center justify-between px-5 pt-safe safe-area-top pb-4 pt-6 bg-bg sticky top-0 z-30 border-b border-border/50">
+      <header className="flex items-center justify-between px-5 pt-6 pb-4 safe-area-top bg-[#0A0E1A] sticky top-0 z-30 border-b border-[#1e2a40]/50">
         <div className="flex items-center gap-2">
           <span className="text-2xl">💸</span>
-          <h1 className="text-xl font-extrabold text-textprimary tracking-tight">Spenzi</h1>
+          <h1 className="text-xl font-extrabold text-[#F1F5F9] tracking-tight">Spenzi</h1>
         </div>
         <button
           onClick={handleSignOut}
-          className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 transition-opacity hover:opacity-80"
+          className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 transition-opacity hover:opacity-80 border-2 border-[#0A0E1A]"
           style={{ backgroundColor: avatarBg(profile?.name ?? '') }}
           title="Sign out"
         >
@@ -139,24 +139,22 @@ export default function GroupsPage() {
       </header>
 
       {/* Content */}
-      <main className="flex-1 px-5 py-5 pb-safe overflow-y-auto">
+      <main className="flex-1 px-5 py-5 pb-[calc(80px+env(safe-area-inset-bottom))] overflow-y-auto">
         {groups.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="text-5xl mb-4">✈️</div>
-            <p className="text-textprimary font-semibold text-lg">No groups yet</p>
-            <p className="text-muted text-sm mt-1">Create a group to start splitting expenses</p>
+            <div className="text-6xl mb-4">✈️</div>
+            <p className="text-[#F1F5F9] font-semibold text-lg">No groups yet</p>
+            <p className="text-[#64748B] text-sm mt-1">Create a group to start splitting expenses</p>
             <Link
               href="/groups/new"
-              className="mt-6 px-6 py-3 bg-accent text-bg rounded-2xl font-bold text-sm active:scale-95 transition-transform"
+              className="mt-6 px-6 py-3 bg-[#00D4AA] text-[#0A0E1A] rounded-2xl font-bold text-sm active:scale-95 transition-transform min-h-[44px] flex items-center"
             >
               Create your first group
             </Link>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            <h2 className="text-muted text-xs font-semibold uppercase tracking-wider mb-1">
-              Your groups
-            </h2>
+            <h2 className="section-label mb-1">Your groups</h2>
             {groups.map((group) => {
               const meta = groupMeta[group.id] ?? { memberCount: 0, myBalance: 0 }
               const balance = meta.myBalance
@@ -164,21 +162,25 @@ export default function GroupsPage() {
                 <Link
                   key={group.id}
                   href={`/groups/${group.id}`}
-                  className="bg-surface2 rounded-2xl p-4 border border-border flex items-center gap-4 active:scale-[0.98] transition-transform"
+                  className="bg-[#111827] rounded-2xl p-4 border border-[#1e2a40] flex items-center gap-4 active:scale-[0.98] transition-transform"
                 >
-                  {/* Icon */}
-                  <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-2xl flex-shrink-0">
-                    ✈️
+                  {/* Colored initial circle */}
+                  <div
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-bold flex-shrink-0 text-[#0A0E1A]"
+                    style={{ backgroundColor: avatarBg(group.name) }}
+                  >
+                    {group.name.charAt(0).toUpperCase()}
                   </div>
 
                   {/* Details */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-textprimary font-semibold text-base truncate">{group.name}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs font-semibold bg-surface px-2 py-0.5 rounded-full border border-border text-muted">
-                        {group.currency}
-                      </span>
-                      <span className="text-xs text-muted">
+                    <div className="flex items-center gap-2">
+                      <p className="text-[#F1F5F9] font-semibold text-base truncate">{group.name}</p>
+                      <span className="chip flex-shrink-0">{group.currency}</span>
+                    </div>
+                    <div className="flex items-center gap-1 mt-1.5">
+                      {/* stacked member avatars placeholder — memberCount only available */}
+                      <span className="text-xs text-[#64748B]">
                         {meta.memberCount} {meta.memberCount === 1 ? 'member' : 'members'}
                       </span>
                     </div>
@@ -187,18 +189,18 @@ export default function GroupsPage() {
                   {/* Balance */}
                   <div className="flex-shrink-0 text-right">
                     {Math.abs(balance) < 0.01 ? (
-                      <p className="text-muted text-sm font-medium">Settled</p>
+                      <p className="text-[#64748B] text-sm font-medium">All settled</p>
                     ) : balance > 0 ? (
                       <>
-                        <p className="text-accent text-xs font-medium">you are owed</p>
-                        <p className="text-accent font-bold text-sm">
+                        <p className="text-[#00D4AA] text-xs font-medium">owed</p>
+                        <p className="balance-positive text-sm">
                           {formatCurrency(balance, group.currency)}
                         </p>
                       </>
                     ) : (
                       <>
-                        <p className="text-danger text-xs font-medium">you owe</p>
-                        <p className="text-danger font-bold text-sm">
+                        <p className="text-[#FF6B6B] text-xs font-medium">owe</p>
+                        <p className="balance-negative text-sm">
                           {formatCurrency(Math.abs(balance), group.currency)}
                         </p>
                       </>
@@ -214,7 +216,7 @@ export default function GroupsPage() {
       {/* FAB */}
       <Link
         href="/groups/new"
-        className="fixed bottom-24 right-5 w-14 h-14 bg-accent rounded-full flex items-center justify-center shadow-lg shadow-accent/30 active:scale-95 transition-transform z-20"
+        className="fixed bottom-24 right-5 w-14 h-14 bg-[#00D4AA] rounded-full flex items-center justify-center shadow-lg shadow-[#00D4AA]/30 active:scale-95 transition-transform z-20"
         aria-label="Create new group"
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0A0E1A" strokeWidth="2.5" strokeLinecap="round">

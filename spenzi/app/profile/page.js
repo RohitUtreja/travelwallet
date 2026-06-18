@@ -85,29 +85,27 @@ export default function ProfilePage() {
       <Toast toasts={toasts} />
 
       {/* Header */}
-      <header className="flex items-center gap-3 px-5 pt-6 pb-4 safe-area-top border-b border-border/50 sticky top-0 z-30 bg-bg">
-        <h1 className="text-lg font-bold text-textprimary">Profile</h1>
+      <header className="flex items-center gap-3 px-5 pt-6 pb-4 safe-area-top border-b border-[#1e2a40]/50 sticky top-0 z-30 bg-[#0A0E1A]">
+        <h1 className="text-lg font-bold text-[#F1F5F9]">Profile</h1>
       </header>
 
-      <main className="flex-1 px-5 py-6 pb-safe overflow-y-auto">
-        {/* Avatar preview */}
+      <main className="flex-1 px-5 py-6 pb-[calc(80px+env(safe-area-inset-bottom))] overflow-y-auto">
+        {/* Large avatar preview centered */}
         <div className="flex flex-col items-center mb-8">
           <div
-            className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold mb-3"
+            className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold mb-3 border-4 border-[#0A0E1A] shadow-lg"
             style={{ backgroundColor: avatarColor }}
           >
             {getInitial(name || user?.email || '?')}
           </div>
-          <p className="text-textprimary font-semibold text-lg">{name || 'Your name'}</p>
-          <p className="text-muted text-sm">{user?.email}</p>
+          <p className="text-[#F1F5F9] font-semibold text-lg">{name || 'Your name'}</p>
+          <p className="text-[#64748B] text-sm">{user?.email}</p>
         </div>
 
         <form onSubmit={handleSave} className="flex flex-col gap-6">
           {/* Name */}
           <div className="flex flex-col gap-2">
-            <label className="text-muted text-xs font-semibold uppercase tracking-wider">
-              Display Name
-            </label>
+            <label className="section-label">Display Name</label>
             <input
               type="text"
               className="input-field"
@@ -119,18 +117,16 @@ export default function ProfilePage() {
             />
           </div>
 
-          {/* Avatar color */}
+          {/* Avatar color swatches */}
           <div className="flex flex-col gap-2">
-            <label className="text-muted text-xs font-semibold uppercase tracking-wider">
-              Avatar Color
-            </label>
+            <label className="section-label">Avatar Color</label>
             <div className="flex flex-wrap gap-3">
               {AVATAR_COLORS.map((color) => (
                 <button
                   key={color}
                   type="button"
                   onClick={() => setAvatarColor(color)}
-                  className="w-9 h-9 rounded-full transition-transform active:scale-90"
+                  className="w-10 h-10 rounded-full transition-transform active:scale-90 min-h-[44px] min-w-[44px]"
                   style={{
                     backgroundColor: color,
                     outline: avatarColor === color ? `3px solid ${color}` : 'none',
@@ -154,15 +150,17 @@ export default function ProfilePage() {
           </button>
         </form>
 
-        {/* Sign out */}
-        <div className="mt-10 pt-6 border-t border-border">
+        {/* Sign out in red */}
+        <div className="mt-10 pt-6 border-t border-[#1e2a40]">
           <button
             onClick={handleSignOut}
-            className="w-full py-3.5 rounded-2xl border border-danger/30 text-danger font-semibold text-base transition-all active:scale-95 hover:bg-danger/10"
+            className="w-full py-3.5 rounded-2xl border border-[#FF6B6B]/30 text-[#FF6B6B] font-semibold text-base transition-all active:scale-95 hover:bg-[#FF6B6B]/10 min-h-[44px]"
           >
             Sign out
           </button>
         </div>
+
+        <p className="text-center text-[#64748B]/40 text-xs mt-8">Spenzi v1.0</p>
       </main>
 
       <BottomNav />
