@@ -90,25 +90,23 @@ export default function NewGroupPage() {
       <Toast toasts={toasts} />
 
       {/* Header */}
-      <header className="flex items-center gap-3 px-5 pt-6 pb-4 safe-area-top border-b border-border/50 sticky top-0 z-30 bg-bg">
+      <header className="flex items-center gap-3 px-5 pt-6 pb-4 safe-area-top border-b border-[#1e2a40]/50 sticky top-0 z-30 bg-[#0A0E1A]">
         <button
           onClick={() => router.back()}
-          className="w-9 h-9 rounded-xl bg-surface2 border border-border flex items-center justify-center flex-shrink-0"
+          className="w-10 h-10 rounded-xl bg-[#1a2234] border border-[#1e2a40] flex items-center justify-center flex-shrink-0 min-h-[44px]"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8F0FE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F1F5F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
         </button>
-        <h1 className="text-lg font-bold text-textprimary">New Group</h1>
+        <h1 className="text-lg font-bold text-[#F1F5F9]">New Group</h1>
       </header>
 
       <form onSubmit={handleCreate} className="flex-1 flex flex-col overflow-y-auto">
         <div className="flex flex-col gap-6 px-5 py-6">
           {/* Group name */}
           <div className="flex flex-col gap-2">
-            <label className="text-muted text-xs font-semibold uppercase tracking-wider">
-              Group name
-            </label>
+            <label className="section-label">Group name</label>
             <input
               type="text"
               className="input-field"
@@ -120,21 +118,19 @@ export default function NewGroupPage() {
             />
           </div>
 
-          {/* Currency */}
+          {/* Currency — horizontal scroll pill chips */}
           <div className="flex flex-col gap-2">
-            <label className="text-muted text-xs font-semibold uppercase tracking-wider">
-              Currency
-            </label>
-            <div className="flex flex-wrap gap-2">
+            <label className="section-label">Currency</label>
+            <div className="flex gap-2 overflow-x-auto pb-1 -mx-5 px-5 scrollbar-hide">
               {CURRENCIES.map((c) => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setCurrency(c)}
-                  className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
+                  className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all flex-shrink-0 min-h-[44px] ${
                     currency === c
-                      ? 'bg-accent text-bg border-accent'
-                      : 'bg-surface2 text-muted border-border hover:border-accent/40'
+                      ? 'bg-[#00D4AA] text-[#0A0E1A] border-[#00D4AA]'
+                      : 'bg-[#1a2234] text-[#64748B] border-[#1e2a40] hover:border-[#00D4AA]/40'
                   }`}
                 >
                   {c}
@@ -145,9 +141,7 @@ export default function NewGroupPage() {
 
           {/* Members */}
           <div className="flex flex-col gap-2">
-            <label className="text-muted text-xs font-semibold uppercase tracking-wider">
-              Members ({selectedMembers.length} selected)
-            </label>
+            <label className="section-label">Members ({selectedMembers.length} selected)</label>
             <input
               type="text"
               className="input-field"
@@ -157,7 +151,7 @@ export default function NewGroupPage() {
             />
             <div className="flex flex-col gap-2 mt-1 max-h-64 overflow-y-auto">
               {filteredProfiles.length === 0 && (
-                <p className="text-muted text-sm text-center py-4">No profiles found</p>
+                <p className="text-[#64748B] text-sm text-center py-4">No profiles found</p>
               )}
               {filteredProfiles.map((profile) => {
                 const isSelected = selectedMembers.includes(profile.id)
@@ -167,8 +161,8 @@ export default function NewGroupPage() {
                     key={profile.id}
                     type="button"
                     onClick={() => toggleMember(profile.id)}
-                    className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
-                      isSelected ? 'bg-accent/10 border-accent/40' : 'bg-surface2 border-border'
+                    className={`flex items-center gap-3 p-3 rounded-xl border transition-all min-h-[44px] ${
+                      isSelected ? 'bg-[#00D4AA]/10 border-[#00D4AA]/40' : 'bg-[#1a2234] border-[#1e2a40]'
                     } ${isMe ? 'opacity-60 cursor-default' : 'cursor-pointer'}`}
                   >
                     <div
@@ -177,7 +171,7 @@ export default function NewGroupPage() {
                     >
                       {profile.name.charAt(0).toUpperCase()}
                     </div>
-                    <span className="text-textprimary text-sm font-medium flex-1 text-left">
+                    <span className="text-[#F1F5F9] text-sm font-medium flex-1 text-left">
                       {profile.name} {isMe ? '(you)' : ''}
                     </span>
                     {isSelected && (
@@ -192,8 +186,8 @@ export default function NewGroupPage() {
           </div>
         </div>
 
-        {/* Submit */}
-        <div className="px-5 pb-8 mt-auto">
+        {/* Submit — fixed at bottom */}
+        <div className="px-5 pb-8 mt-auto sticky bottom-0 bg-[#0A0E1A] border-t border-[#1e2a40]/50 pt-4">
           <button
             type="submit"
             disabled={loading || !name.trim() || selectedMembers.length < 1}

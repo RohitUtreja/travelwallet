@@ -19,18 +19,18 @@ export default function Toast({ toasts }) {
   if (!toasts || toasts.length === 0) return null
 
   return (
-    <div className="fixed top-4 left-0 right-0 z-50 flex flex-col items-center gap-2 px-4 pointer-events-none">
+    <div className="fixed bottom-24 left-0 right-0 z-50 flex flex-col items-center gap-2 px-4 pointer-events-none">
       {toasts.map((toast) => (
         <div
           key={toast.id}
           className={`
-            w-full max-w-sm px-4 py-3 rounded-xl text-sm font-medium shadow-lg pointer-events-auto
-            animate-slide-down
+            px-5 py-3 rounded-full text-sm font-semibold shadow-lg pointer-events-auto
+            animate-slide-up
             ${toast.type === 'error'
-              ? 'bg-danger/20 border border-danger/40 text-danger'
+              ? 'bg-[#FF6B6B]/20 border border-[#FF6B6B]/40 text-[#FF6B6B]'
               : toast.type === 'success'
-              ? 'bg-accent/20 border border-accent/40 text-accent'
-              : 'bg-surface2 border border-border text-textprimary'
+              ? 'bg-[#00D4AA]/20 border border-[#00D4AA]/40 text-[#00D4AA]'
+              : 'bg-[#1a2234] border border-[#1e2a40] text-[#F1F5F9]'
             }
           `}
         >

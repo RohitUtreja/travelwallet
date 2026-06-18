@@ -90,29 +90,29 @@ export default function SettlePage() {
       <Toast toasts={toasts} />
 
       {/* Header */}
-      <header className="flex items-center gap-3 px-5 pt-6 pb-4 safe-area-top border-b border-border/50 sticky top-0 z-30 bg-bg">
+      <header className="flex items-center gap-3 px-5 pt-6 pb-4 safe-area-top border-b border-[#1e2a40]/50 sticky top-0 z-30 bg-[#0A0E1A]">
         <button
           onClick={() => router.back()}
-          className="w-9 h-9 rounded-xl bg-surface2 border border-border flex items-center justify-center flex-shrink-0"
+          className="w-10 h-10 rounded-xl bg-[#1a2234] border border-[#1e2a40] flex items-center justify-center flex-shrink-0 min-h-[44px]"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8F0FE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F1F5F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
         </button>
-        <h1 className="text-lg font-bold text-textprimary">Settle Up</h1>
+        <h1 className="text-lg font-bold text-[#F1F5F9]">Settle Up</h1>
       </header>
 
-      <main className="flex-1 flex flex-col items-center px-5 py-10">
-        {/* Settlement visualization */}
-        <div className="w-full max-w-sm bg-surface2 rounded-2xl border border-border p-6 flex flex-col items-center gap-6 animate-fade-in">
-          <p className="text-muted text-sm text-center">You are recording the following settlement:</p>
+      <main className="flex-1 flex flex-col items-center justify-center px-5 py-10">
+        {/* Settlement visualization — centered */}
+        <div className="w-full max-w-sm flex flex-col items-center gap-8 animate-fade-in">
+          <p className="text-[#64748B] text-sm text-center">Recording the following settlement:</p>
 
-          {/* From → To */}
+          {/* From → amount → To */}
           <div className="flex items-center gap-4 w-full justify-center">
             {/* From */}
             <div className="flex flex-col items-center gap-2">
               <div
-                className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold border-2"
+                className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold border-2"
                 style={{
                   backgroundColor: fromProfile?.avatar_color ?? avatarBg(fromProfile?.name ?? ''),
                   borderColor: isMyDebt ? '#FF6B6B' : 'transparent',
@@ -120,29 +120,27 @@ export default function SettlePage() {
               >
                 {getInitial(fromProfile?.name ?? '?')}
               </div>
-              <p className={`text-xs font-semibold ${isMyDebt ? 'text-danger' : 'text-textprimary'}`}>
+              <p className={`text-sm font-semibold ${isMyDebt ? 'text-[#FF6B6B]' : 'text-[#F1F5F9]'}`}>
                 {isMyDebt ? 'You' : fromProfile?.name}
               </p>
             </div>
 
-            {/* Arrow + amount */}
+            {/* Arrow */}
             <div className="flex flex-col items-center gap-1 flex-1">
-              <p className="text-2xl font-extrabold text-textprimary">
-                {formatCurrency(amountParam, group?.currency ?? 'EUR')}
-              </p>
-              <div className="flex items-center gap-1">
-                <div className="h-0.5 w-10 bg-accent/40 rounded-full" />
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="#00D4AA">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
+              <div className="flex items-center gap-1 w-full justify-center">
+                <div className="h-px flex-1 bg-[#1e2a40]" />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
                 </svg>
+                <div className="h-px flex-1 bg-[#1e2a40]" />
               </div>
-              <p className="text-muted text-xs">pays</p>
+              <p className="text-[#64748B] text-xs">pays</p>
             </div>
 
             {/* To */}
             <div className="flex flex-col items-center gap-2">
               <div
-                className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold border-2"
+                className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold border-2"
                 style={{
                   backgroundColor: toProfile?.avatar_color ?? avatarBg(toProfile?.name ?? ''),
                   borderColor: isMyCredit ? '#00D4AA' : 'transparent',
@@ -150,15 +148,20 @@ export default function SettlePage() {
               >
                 {getInitial(toProfile?.name ?? '?')}
               </div>
-              <p className={`text-xs font-semibold ${isMyCredit ? 'text-accent' : 'text-textprimary'}`}>
+              <p className={`text-sm font-semibold ${isMyCredit ? 'text-[#00D4AA]' : 'text-[#F1F5F9]'}`}>
                 {isMyCredit ? 'You' : toProfile?.name}
               </p>
             </div>
           </div>
 
+          {/* Big amount in accent */}
+          <p className="text-4xl font-extrabold text-[#00D4AA] amount-display">
+            {formatCurrency(amountParam, group?.currency ?? 'EUR')}
+          </p>
+
           {/* Context note */}
-          <div className="w-full bg-surface rounded-xl border border-border/50 p-3 text-center">
-            <p className="text-muted text-xs">
+          <div className="w-full bg-[#111827] rounded-xl border border-[#1e2a40]/50 p-3 text-center">
+            <p className="text-[#64748B] text-xs">
               {isMyDebt
                 ? `You are confirming that you have paid ${toProfile?.name} ${formatCurrency(amountParam, group?.currency ?? 'EUR')}.`
                 : isMyCredit
@@ -166,26 +169,26 @@ export default function SettlePage() {
                 : `Recording that ${fromProfile?.name} paid ${toProfile?.name} ${formatCurrency(amountParam, group?.currency ?? 'EUR')}.`}
             </p>
           </div>
-        </div>
 
-        <div className="w-full max-w-sm mt-8 flex flex-col gap-3">
-          <button
-            onClick={handleSettle}
-            disabled={loading}
-            className="btn-primary flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <span className="w-5 h-5 border-2 border-bg/30 border-t-bg rounded-full animate-spin" />
-            ) : (
-              'Confirm Settlement'
-            )}
-          </button>
-          <button
-            onClick={() => router.back()}
-            className="btn-ghost"
-          >
-            Cancel
-          </button>
+          <div className="w-full flex flex-col gap-3">
+            <button
+              onClick={handleSettle}
+              disabled={loading}
+              className="btn-primary flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <span className="w-5 h-5 border-2 border-bg/30 border-t-bg rounded-full animate-spin" />
+              ) : (
+                'Confirm Settlement'
+              )}
+            </button>
+            <button
+              onClick={() => router.back()}
+              className="btn-ghost"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </main>
     </div>

@@ -94,53 +94,56 @@ export default function GroupDetailPage() {
       <Toast toasts={toasts} />
 
       {/* Header */}
-      <header className="px-5 pt-6 pb-0 safe-area-top bg-bg sticky top-0 z-30 border-b border-border/50">
-        <div className="flex items-center gap-3 pb-4">
+      <header className="px-5 pt-6 pb-0 safe-area-top bg-[#0A0E1A] sticky top-0 z-30 border-b border-[#1e2a40]/50">
+        <div className="flex items-center gap-3 pb-3">
           <button
             onClick={() => router.back()}
-            className="w-9 h-9 rounded-xl bg-surface2 border border-border flex items-center justify-center flex-shrink-0"
+            className="w-10 h-10 rounded-xl bg-[#1a2234] border border-[#1e2a40] flex items-center justify-center flex-shrink-0 min-h-[44px]"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8F0FE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F1F5F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-textprimary truncate">{group?.name}</h1>
-              <span className="text-xs font-semibold bg-surface2 border border-border text-muted px-2 py-0.5 rounded-full flex-shrink-0">
-                {group?.currency}
-              </span>
+              <h1 className="text-lg font-bold text-[#F1F5F9] truncate">{group?.name}</h1>
+              <span className="chip flex-shrink-0">{group?.currency}</span>
             </div>
-            {/* Member avatars */}
-            <div className="flex items-center gap-1 mt-1">
-              {members.slice(0, 6).map((m) => (
+            {/* Member avatar row */}
+            <div className="flex items-center gap-0.5 mt-1.5">
+              {members.slice(0, 6).map((m, i) => (
                 <div
                   key={m.user_id}
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold border border-bg"
-                  style={{ backgroundColor: m.profiles?.avatar_color ?? avatarBg(m.profiles?.name ?? '') }}
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-[#0A0E1A] flex-shrink-0"
+                  style={{
+                    backgroundColor: m.profiles?.avatar_color ?? avatarBg(m.profiles?.name ?? ''),
+                    marginLeft: i > 0 ? '-6px' : '0',
+                    zIndex: 6 - i,
+                    position: 'relative',
+                  }}
                   title={m.profiles?.name}
                 >
                   {getInitial(m.profiles?.name ?? '')}
                 </div>
               ))}
               {members.length > 6 && (
-                <span className="text-muted text-xs ml-1">+{members.length - 6}</span>
+                <span className="text-[#64748B] text-xs ml-2">+{members.length - 6}</span>
               )}
             </div>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-0">
+        {/* Pill tab bar */}
+        <div className="flex gap-2 pb-3">
           {['expenses', 'balances'].map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`flex-1 py-3 text-sm font-semibold capitalize transition-colors border-b-2 ${
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition-all min-h-[36px] ${
                 tab === t
-                  ? 'text-accent border-accent'
-                  : 'text-muted border-transparent hover:text-textprimary'
+                  ? 'bg-[#00D4AA] text-[#0A0E1A]'
+                  : 'bg-[#1a2234] text-[#64748B] border border-[#1e2a40]'
               }`}
             >
               {t === 'expenses' ? `Expenses (${expenses.length})` : `Balances (${transactions.length})`}
@@ -150,14 +153,14 @@ export default function GroupDetailPage() {
       </header>
 
       {/* Content */}
-      <main className="flex-1 px-5 py-5 pb-safe overflow-y-auto">
+      <main className="flex-1 px-5 py-5 pb-[calc(80px+env(safe-area-inset-bottom))] overflow-y-auto">
         {tab === 'expenses' && (
           <div className="flex flex-col gap-3">
             {expenses.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="text-4xl mb-3">🧾</div>
-                <p className="text-textprimary font-semibold">No expenses yet</p>
-                <p className="text-muted text-sm mt-1">Add the first expense below</p>
+                <p className="text-[#F1F5F9] font-semibold">No expenses yet</p>
+                <p className="text-[#64748B] text-sm mt-1">Add the first expense below</p>
               </div>
             ) : (
               expenses.map((expense) => (
@@ -178,8 +181,8 @@ export default function GroupDetailPage() {
             {transactions.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="text-4xl mb-3">🎉</div>
-                <p className="text-textprimary font-semibold">All settled up!</p>
-                <p className="text-muted text-sm mt-1">No outstanding balances</p>
+                <p className="text-[#F1F5F9] font-semibold">All settled up!</p>
+                <p className="text-[#64748B] text-sm mt-1">No outstanding balances</p>
               </div>
             ) : (
               transactions.map((tx, i) => (
@@ -196,18 +199,20 @@ export default function GroupDetailPage() {
         )}
       </main>
 
-      {/* FAB */}
-      <Link
-        href={`/groups/${id}/add`}
-        className="fixed bottom-8 right-5 w-14 h-14 bg-accent rounded-full flex items-center justify-center shadow-lg shadow-accent/30 active:scale-95 transition-transform z-20"
-        aria-label="Add expense"
-        style={{ bottom: 'max(2rem, calc(env(safe-area-inset-bottom) + 1rem))' }}
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0A0E1A" strokeWidth="2.5" strokeLinecap="round">
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-      </Link>
+      {/* FAB — only on expenses tab */}
+      {tab === 'expenses' && (
+        <Link
+          href={`/groups/${id}/add`}
+          className="fixed right-5 w-14 h-14 bg-[#00D4AA] rounded-full flex items-center justify-center shadow-lg shadow-[#00D4AA]/30 active:scale-95 transition-transform z-20"
+          aria-label="Add expense"
+          style={{ bottom: 'max(5rem, calc(4rem + env(safe-area-inset-bottom)))' }}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0A0E1A" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </Link>
+      )}
     </div>
   )
 }

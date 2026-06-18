@@ -31,18 +31,18 @@ export default function BottomNav({ onProfileClick }) {
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-surface border-t border-border safe-area-bottom">
-      <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#111827]/90 backdrop-blur-lg border-t border-[#1e2a40] safe-area-bottom">
+      <div className="flex items-center justify-around max-w-lg mx-auto" style={{ height: '64px' }}>
         {tabs.map((tab) => {
           const active = pathname === tab.href || (tab.href === '/groups' && pathname.startsWith('/groups'))
           return (
             <Link
               key={tab.href}
               href={tab.href}
-              className="flex flex-col items-center gap-1 flex-1 py-2"
+              className="flex flex-col items-center gap-1 flex-1 py-2 min-h-[44px] justify-center"
             >
               {tab.icon(active)}
-              <span className={`text-xs font-medium ${active ? 'text-accent' : 'text-muted'}`}>
+              <span className={`text-xs font-semibold ${active ? 'text-[#00D4AA]' : 'text-[#64748B]'}`}>
                 {tab.label}
               </span>
             </Link>
