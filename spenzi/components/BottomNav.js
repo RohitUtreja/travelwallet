@@ -8,9 +8,9 @@ export default function BottomNav({ onProfileClick }) {
   const tabs = [
     {
       href: '/groups',
-      label: 'Groups',
+      label: 'GROUPS',
       icon: (active) => (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={active ? '#00D4AA' : '#5a7090'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#ccff00' : 'rgba(235,235,235,0.3)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
           <circle cx="9" cy="7" r="4"/>
           <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
@@ -20,9 +20,9 @@ export default function BottomNav({ onProfileClick }) {
     },
     {
       href: '/profile',
-      label: 'Profile',
+      label: 'PROFILE',
       icon: (active) => (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={active ? '#00D4AA' : '#5a7090'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#ccff00' : 'rgba(235,235,235,0.3)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
           <circle cx="12" cy="7" r="4"/>
         </svg>
@@ -31,8 +31,16 @@ export default function BottomNav({ onProfileClick }) {
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#111827]/90 backdrop-blur-lg border-t border-[#1e2a40] safe-area-bottom">
-      <div className="flex items-center justify-around max-w-lg mx-auto" style={{ height: '64px' }}>
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-40 border-t safe-area-bottom"
+      style={{
+        background: 'rgba(12,12,12,0.85)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderColor: 'rgba(255,255,255,0.08)',
+      }}
+    >
+      <div className="flex items-center justify-around max-w-[430px] mx-auto" style={{ height: '68px' }}>
         {tabs.map((tab) => {
           const active = pathname === tab.href || (tab.href === '/groups' && pathname.startsWith('/groups'))
           return (
@@ -42,7 +50,14 @@ export default function BottomNav({ onProfileClick }) {
               className="flex flex-col items-center gap-1 flex-1 py-2 min-h-[44px] justify-center"
             >
               {tab.icon(active)}
-              <span className={`text-xs font-semibold ${active ? 'text-[#00D4AA]' : 'text-[#64748B]'}`}>
+              <span
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '9px',
+                  letterSpacing: '0.1em',
+                  color: active ? '#ccff00' : 'rgba(235,235,235,0.3)',
+                }}
+              >
                 {tab.label}
               </span>
             </Link>

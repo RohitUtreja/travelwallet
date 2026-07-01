@@ -38,21 +38,35 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-[#0A0E1A] flex flex-col items-center justify-center px-6 safe-area-top">
+    <div className="min-h-dvh flex flex-col items-center justify-center px-6 safe-area-top" style={{ background: '#000' }}>
       <Toast toasts={toasts} />
 
-      {/* Logo */}
-      <div className="flex flex-col items-center mb-10 animate-fade-in">
-        <div className="text-6xl mb-4">💸</div>
-        <h1 className="text-4xl font-extrabold text-[#00D4AA] tracking-tight">Spenzi</h1>
-        <p className="text-[#64748B] text-sm mt-2 text-center">Split smarter, travel together</p>
+      {/* Mono tag */}
+      <div className="flex items-center gap-2 mb-10 animate-fade-in">
+        <span className="pulse-lime w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#ccff00', display: 'inline-block' }} />
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(235,235,235,0.4)' }}>
+          [ SPENZI // EXPENSE SPLIT ]
+        </span>
+      </div>
+
+      {/* Logo + name */}
+      <div className="flex flex-col items-center mb-10 animate-fade-in" style={{ animationDelay: '0.05s' }}>
+        <div className="card flex items-center justify-center mb-5 float-anim" style={{ width: '80px', height: '80px', borderRadius: '1.5rem' }}>
+          <span style={{ fontSize: '2.5rem' }}>💸</span>
+        </div>
+        <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '2.5rem', fontWeight: 700, letterSpacing: '-0.04em', color: '#ebebeb', lineHeight: 1 }}>
+          Spenzi
+        </h1>
+        <p className="mt-2 text-sm text-center" style={{ color: 'rgba(235,235,235,0.4)' }}>
+          Split smarter, travel together
+        </p>
       </div>
 
       {/* Form card */}
-      <div className="w-full max-w-sm bg-[#111827] border border-[#1e2a40] rounded-3xl p-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+      <div className="card w-full max-w-sm animate-fade-in" style={{ animationDelay: '0.1s' }}>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="section-label pl-1">Email</label>
+            <label className="section-label">Email</label>
             <input
               type="email"
               className="input-field"
@@ -66,7 +80,7 @@ export default function LoginPage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="section-label pl-1">Password</label>
+            <label className="section-label">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -80,7 +94,8 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#F1F5F9] transition-colors min-h-[44px] flex items-center"
+                className="absolute right-4 top-1/2 -translate-y-1/2 min-h-[44px] flex items-center transition-colors"
+                style={{ color: 'rgba(235,235,235,0.3)' }}
                 tabIndex={-1}
               >
                 {showPassword ? (
@@ -105,7 +120,7 @@ export default function LoginPage() {
             className="btn-primary mt-2 flex items-center justify-center gap-2"
           >
             {loading ? (
-              <span className="w-5 h-5 border-2 border-bg/30 border-t-bg rounded-full animate-spin" />
+              <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
             ) : (
               'Sign in'
             )}
@@ -113,8 +128,8 @@ export default function LoginPage() {
         </form>
       </div>
 
-      <p className="text-[#64748B]/50 text-xs mt-8">
-        Powered by Supabase
+      <p className="text-xs mt-8 text-center" style={{ color: 'rgba(235,235,235,0.2)' }}>
+        Contact your admin to get access
       </p>
     </div>
   )

@@ -12,7 +12,7 @@ export default function GroupDetailPage() {
   const router = useRouter()
   const { id } = useParams()
   const { toasts, showToast } = useToast()
-  const [tab, setTab] = useState('expenses') // 'expenses' | 'balances'
+  const [tab, setTab] = useState('expenses')
   const [currentUser, setCurrentUser] = useState(null)
   const [group, setGroup] = useState(null)
   const [members, setMembers] = useState([])
@@ -49,8 +49,6 @@ export default function GroupDetailPage() {
     setMembers(membersData ?? [])
     setExpenses(expensesData ?? [])
 
-    // Compute balances + simplify debts
-    const expenseIds = new Set((expensesData ?? []).map((e) => e.id))
     const allSplits = (expensesData ?? []).flatMap((e) =>
       (e.expense_splits ?? []).map((s) => ({ ...s, expense_id: e.id }))
     )
@@ -83,8 +81,8 @@ export default function GroupDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-dvh bg-bg flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+      <div className="min-h-dvh flex items-center justify-center" style={{ background: '#0c0c0c' }}>
+        <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(204,255,0,0.3)', borderTopColor: '#ccff00' }} />
       </div>
     )
   }
@@ -94,33 +92,39 @@ export default function GroupDetailPage() {
       <Toast toasts={toasts} />
 
       {/* Header */}
-      <header className="px-5 pt-6 pb-0 safe-area-top bg-[#0A0E1A] sticky top-0 z-30 border-b border-[#1e2a40]/50">
+      <header className="px-5 pt-6 pb-0 safe-area-top sticky top-0 z-30 border-b" style={{ background: '#0c0c0c', borderColor: 'rgba(255,255,255,0.08)' }}>
         <div className="flex items-center gap-3 pb-3">
           <button
             onClick={() => router.back()}
-            className="w-10 h-10 rounded-xl bg-[#1a2234] border border-[#1e2a40] flex items-center justify-center flex-shrink-0 min-h-[44px]"
+            className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0 min-h-[44px]"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F1F5F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ebebeb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-[#F1F5F9] truncate">{group?.name}</h1>
-              <span className="chip flex-shrink-0">{group?.currency}</span>
+              <h1 className="truncate" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '17px', color: '#ebebeb', letterSpacing: '-0.02em' }}>
+                {group?.name}
+              </h1>
+              <span className="mono text-[10px] px-2 py-0.5 rounded-full flex-shrink-0" style={{ color: '#ccff00', background: 'rgba(204,255,0,0.08)', border: '1px solid rgba(204,255,0,0.2)' }}>
+                {group?.currency}
+              </span>
             </div>
-            {/* Member avatar row */}
+            {/* Member avatar stack */}
             <div className="flex items-center gap-0.5 mt-1.5">
               {members.slice(0, 6).map((m, i) => (
                 <div
                   key={m.user_id}
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-[#0A0E1A] flex-shrink-0"
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0"
                   style={{
                     backgroundColor: m.profiles?.avatar_color ?? avatarBg(m.profiles?.name ?? ''),
-                    marginLeft: i > 0 ? '-6px' : '0',
+                    border: '1.5px solid #ccff00',
+                    marginLeft: i > 0 ? '-5px' : '0',
                     zIndex: 6 - i,
                     position: 'relative',
+                    color: '#000',
                   }}
                   title={m.profiles?.name}
                 >
@@ -128,39 +132,42 @@ export default function GroupDetailPage() {
                 </div>
               ))}
               {members.length > 6 && (
-                <span className="text-[#64748B] text-xs ml-2">+{members.length - 6}</span>
+                <span className="mono text-[10px] ml-2" style={{ color: 'rgba(235,235,235,0.3)' }}>+{members.length - 6}</span>
               )}
             </div>
           </div>
         </div>
 
-        {/* Pill tab bar */}
-        <div className="flex gap-2 pb-3">
+        {/* Tab bar */}
+        <div className="flex gap-0 pb-0">
           {['expenses', 'balances'].map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold transition-all min-h-[36px] ${
-                tab === t
-                  ? 'bg-[#00D4AA] text-[#0A0E1A]'
-                  : 'bg-[#1a2234] text-[#64748B] border border-[#1e2a40]'
-              }`}
+              className="flex-1 py-3 text-xs font-semibold transition-all mono relative"
+              style={{
+                color: tab === t ? '#ccff00' : 'rgba(235,235,235,0.3)',
+                letterSpacing: '0.1em',
+              }}
             >
-              {t === 'expenses' ? `Expenses (${expenses.length})` : `Balances (${transactions.length})`}
+              {t === 'expenses' ? `EXPENSES (${expenses.length})` : `BALANCES (${transactions.length})`}
+              {tab === t && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: '#ccff00' }} />
+              )}
             </button>
           ))}
         </div>
       </header>
 
       {/* Content */}
-      <main className="flex-1 px-5 py-5 pb-[calc(80px+env(safe-area-inset-bottom))] overflow-y-auto">
+      <main className="flex-1 px-5 py-5 overflow-y-auto" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}>
         {tab === 'expenses' && (
           <div className="flex flex-col gap-3">
             {expenses.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="text-4xl mb-3">🧾</div>
-                <p className="text-[#F1F5F9] font-semibold">No expenses yet</p>
-                <p className="text-[#64748B] text-sm mt-1">Add the first expense below</p>
+                <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, color: '#ebebeb' }}>No expenses yet</p>
+                <p className="text-sm mt-1" style={{ color: 'rgba(235,235,235,0.4)' }}>Add the first expense below</p>
               </div>
             ) : (
               expenses.map((expense) => (
@@ -181,8 +188,8 @@ export default function GroupDetailPage() {
             {transactions.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="text-4xl mb-3">🎉</div>
-                <p className="text-[#F1F5F9] font-semibold">All settled up!</p>
-                <p className="text-[#64748B] text-sm mt-1">No outstanding balances</p>
+                <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, color: '#ebebeb' }}>All settled up!</p>
+                <p className="text-sm mt-1" style={{ color: 'rgba(235,235,235,0.4)' }}>No outstanding balances</p>
               </div>
             ) : (
               transactions.map((tx, i) => (
@@ -203,11 +210,11 @@ export default function GroupDetailPage() {
       {tab === 'expenses' && (
         <Link
           href={`/groups/${id}/add`}
-          className="fixed right-5 w-14 h-14 bg-[#00D4AA] rounded-full flex items-center justify-center shadow-lg shadow-[#00D4AA]/30 active:scale-95 transition-transform z-20"
+          className="fixed right-5 w-14 h-14 rounded-full flex items-center justify-center active:scale-95 transition-transform z-20 lime-glow"
+          style={{ bottom: 'max(5rem, calc(4rem + env(safe-area-inset-bottom)))', background: '#ccff00' }}
           aria-label="Add expense"
-          style={{ bottom: 'max(5rem, calc(4rem + env(safe-area-inset-bottom)))' }}
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0A0E1A" strokeWidth="2.5" strokeLinecap="round">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round">
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
