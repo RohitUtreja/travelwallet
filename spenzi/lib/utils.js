@@ -23,18 +23,26 @@ export function parseAmount(str) {
 // ─── Category definitions ────────────────────────────────────────────────────
 
 export const CATEGORIES = {
-  transport: { emoji: '🚌', label: 'Transport', color: '#4A90E2' },
-  car:       { emoji: '🚗', label: 'Car',       color: '#7B68EE' },
-  taxi:      { emoji: '🚕', label: 'Taxi',       color: '#F5A623' },
-  food:      { emoji: '🍽️', label: 'Food',       color: '#FF6B6B' },
-  hotel:     { emoji: '🏨', label: 'Hotel',      color: '#50E3C2' },
-  flights:   { emoji: '✈️', label: 'Flights',    color: '#00D4AA' },
-  activities:{ emoji: '🎡', label: 'Activities', color: '#FF9F43' },
-  shopping:  { emoji: '🛍️', label: 'Shopping',   color: '#EE5A24' },
-  fuel:      { emoji: '⛽', label: 'Fuel',       color: '#C0392B' },
-  medical:   { emoji: '💊', label: 'Medical',    color: '#A29BFE' },
-  comms:     { emoji: '📱', label: 'Comms',      color: '#74B9FF' },
-  other:     { emoji: '💰', label: 'Other',      color: '#5a7090' },
+  // Home / personal
+  rent:          { emoji: '🏠', label: 'Rent',        color: '#A78BFA' },
+  groceries:     { emoji: '🛒', label: 'Groceries',   color: '#34D399' },
+  eatingout:     { emoji: '🍴', label: 'Eating Out',  color: '#FF6B6B' },
+  utilities:     { emoji: '⚡', label: 'Utilities',   color: '#FBBF24' },
+  fitness:       { emoji: '💪', label: 'Fitness',     color: '#10b981' },
+  insurance:     { emoji: '🛡️', label: 'Insurance',   color: '#60A5FA' },
+  investment:    { emoji: '📈', label: 'Investment',  color: '#ccff00' },
+  entertainment: { emoji: '🎬', label: 'Entertain',   color: '#F472B6' },
+  // Travel / group
+  transport:     { emoji: '🚌', label: 'Transport',   color: '#4A90E2' },
+  car:           { emoji: '🚗', label: 'Car',         color: '#7B68EE' },
+  taxi:          { emoji: '🚕', label: 'Taxi',        color: '#F5A623' },
+  hotel:         { emoji: '🏨', label: 'Hotel',       color: '#50E3C2' },
+  flights:       { emoji: '✈️', label: 'Flights',     color: '#00D4AA' },
+  activities:    { emoji: '🎡', label: 'Activities',  color: '#FF9F43' },
+  shopping:      { emoji: '🛍️', label: 'Shopping',    color: '#EE5A24' },
+  fuel:          { emoji: '⛽', label: 'Fuel',        color: '#C0392B' },
+  medical:       { emoji: '💊', label: 'Medical',     color: '#A29BFE' },
+  other:         { emoji: '💰', label: 'Other',       color: '#5a7090' },
 }
 
 export function getCategoryEmoji(category) {

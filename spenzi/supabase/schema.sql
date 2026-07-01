@@ -7,7 +7,8 @@
 create table if not exists profiles (
   id uuid references auth.users primary key,
   name text not null,
-  avatar_color text default '#00D4AA'
+  avatar_color text default '#00D4AA',
+  tracker_currency text default 'USD'
 );
 
 -- ── groups ──────────────────────────────────────────────────
@@ -57,11 +58,24 @@ create table if not exists settlements (
   settled_at timestamptz default now()
 );
 
+-- ── personal_expenses ────────────────────────────────────────
+create table if not exists personal_expenses (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users not null,
+  category text not null default 'other',
+  description text,
+  amount numeric(12,2) not null,
+  currency text not null default 'USD',
+  date date not null default current_date,
+  created_at timestamptz default now()
+);
+
 -- ============================================================
 -- Row Level Security
 -- ============================================================
 
 alter table profiles enable row level security;
+alter table personal_expenses enable row level security;
 alter table groups enable row level security;
 alter table group_members enable row level security;
 alter table expenses enable row level security;
@@ -81,6 +95,12 @@ create policy "Users can update their own profile"
 create policy "Authenticated users can read all profiles"
   on profiles for select
   using (auth.role() = 'authenticated');
+
+-- ── personal_expenses policies ───────────────────────────────
+create policy "Users manage own personal expenses"
+  on personal_expenses for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
 
 -- ── groups policies ──────────────────────────────────────────
 create policy "Members can view groups"
