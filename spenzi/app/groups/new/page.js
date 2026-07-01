@@ -31,7 +31,6 @@ export default function NewGroupPage() {
       .order('name')
 
     setAllProfiles(profiles ?? [])
-    // Auto-select current user
     setSelectedMembers([session.user.id])
   }, [router])
 
@@ -40,7 +39,7 @@ export default function NewGroupPage() {
   }, [init])
 
   function toggleMember(userId) {
-    if (userId === currentUser?.id) return // Can't deselect yourself
+    if (userId === currentUser?.id) return
     setSelectedMembers((prev) =>
       prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
     )
@@ -57,7 +56,6 @@ export default function NewGroupPage() {
 
     const supabase = createClient()
 
-    // Create group
     const { data: group, error: groupError } = await supabase
       .from('groups')
       .insert({ name: name.trim(), currency, created_by: currentUser.id })
@@ -70,7 +68,6 @@ export default function NewGroupPage() {
       return
     }
 
-    // Add members (include current user)
     const memberSet = Array.from(new Set([currentUser.id, ...selectedMembers]))
     const { error: membersError } = await supabase.from('group_members').insert(
       memberSet.map((userId) => ({ group_id: group.id, user_id: userId }))
@@ -90,23 +87,23 @@ export default function NewGroupPage() {
       <Toast toasts={toasts} />
 
       {/* Header */}
-      <header className="flex items-center gap-3 px-5 pt-6 pb-4 safe-area-top border-b border-[#1e2a40]/50 sticky top-0 z-30 bg-[#0A0E1A]">
+      <header className="flex items-center gap-3 px-5 pt-6 pb-4 safe-area-top border-b sticky top-0 z-30" style={{ background: '#0c0c0c', borderColor: 'rgba(255,255,255,0.08)' }}>
         <button
           onClick={() => router.back()}
-          className="w-10 h-10 rounded-xl bg-[#1a2234] border border-[#1e2a40] flex items-center justify-center flex-shrink-0 min-h-[44px]"
+          className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0 min-h-[44px]"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F1F5F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ebebeb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
         </button>
-        <h1 className="text-lg font-bold text-[#F1F5F9]">New Group</h1>
+        <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '17px', color: '#ebebeb', letterSpacing: '-0.02em' }}>New Group</h1>
       </header>
 
       <form onSubmit={handleCreate} className="flex-1 flex flex-col overflow-y-auto">
         <div className="flex flex-col gap-6 px-5 py-6">
           {/* Group name */}
-          <div className="flex flex-col gap-2">
-            <label className="section-label">Group name</label>
+          <div className="flex flex-col">
+            <label className="section-label">// Group Name</label>
             <input
               type="text"
               className="input-field"
@@ -118,20 +115,20 @@ export default function NewGroupPage() {
             />
           </div>
 
-          {/* Currency — horizontal scroll pill chips */}
-          <div className="flex flex-col gap-2">
-            <label className="section-label">Currency</label>
-            <div className="flex gap-2 overflow-x-auto pb-1 -mx-5 px-5 scrollbar-hide">
+          {/* Currency */}
+          <div className="flex flex-col">
+            <label className="section-label">// Currency</label>
+            <div className="flex gap-2 overflow-x-auto pb-1 -mx-5 px-5">
               {CURRENCIES.map((c) => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setCurrency(c)}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all flex-shrink-0 min-h-[44px] ${
-                    currency === c
-                      ? 'bg-[#00D4AA] text-[#0A0E1A] border-[#00D4AA]'
-                      : 'bg-[#1a2234] text-[#64748B] border-[#1e2a40] hover:border-[#00D4AA]/40'
-                  }`}
+                  className="px-4 py-2 rounded-full text-xs font-bold border transition-all flex-shrink-0 min-h-[44px] mono"
+                  style={currency === c
+                    ? { background: '#ccff00', color: '#000', border: '1px solid #ccff00' }
+                    : { background: 'rgba(255,255,255,0.03)', color: 'rgba(235,235,235,0.4)', border: '1px solid rgba(255,255,255,0.1)' }
+                  }
                 >
                   {c}
                 </button>
@@ -140,18 +137,18 @@ export default function NewGroupPage() {
           </div>
 
           {/* Members */}
-          <div className="flex flex-col gap-2">
-            <label className="section-label">Members ({selectedMembers.length} selected)</label>
+          <div className="flex flex-col">
+            <label className="section-label">// Members ({selectedMembers.length} selected)</label>
             <input
               type="text"
-              className="input-field"
+              className="input-field mb-3"
               placeholder="Search people..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <div className="flex flex-col gap-2 mt-1 max-h-64 overflow-y-auto">
+            <div className="flex flex-col gap-2 max-h-64 overflow-y-auto">
               {filteredProfiles.length === 0 && (
-                <p className="text-[#64748B] text-sm text-center py-4">No profiles found</p>
+                <p className="text-sm text-center py-4" style={{ color: 'rgba(235,235,235,0.3)' }}>No profiles found</p>
               )}
               {filteredProfiles.map((profile) => {
                 const isSelected = selectedMembers.includes(profile.id)
@@ -161,21 +158,23 @@ export default function NewGroupPage() {
                     key={profile.id}
                     type="button"
                     onClick={() => toggleMember(profile.id)}
-                    className={`flex items-center gap-3 p-3 rounded-xl border transition-all min-h-[44px] ${
-                      isSelected ? 'bg-[#00D4AA]/10 border-[#00D4AA]/40' : 'bg-[#1a2234] border-[#1e2a40]'
-                    } ${isMe ? 'opacity-60 cursor-default' : 'cursor-pointer'}`}
+                    className="card flex items-center gap-3 min-h-[56px] transition-all active:scale-[0.98] text-left"
+                    style={isSelected
+                      ? { border: '1px solid rgba(204,255,0,0.3)', background: 'rgba(204,255,0,0.04)' }
+                      : {}
+                    }
                   >
                     <div
                       className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-                      style={{ backgroundColor: profile.avatar_color ?? '#00D4AA' }}
+                      style={{ background: isSelected ? '#ccff00' : (profile.avatar_color ?? 'rgba(255,255,255,0.1)'), color: isSelected ? '#000' : '#ebebeb' }}
                     >
                       {profile.name.charAt(0).toUpperCase()}
                     </div>
-                    <span className="text-[#F1F5F9] text-sm font-medium flex-1 text-left">
+                    <span className="text-sm font-medium flex-1" style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#ebebeb' }}>
                       {profile.name} {isMe ? '(you)' : ''}
                     </span>
                     {isSelected && (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccff00" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12"/>
                       </svg>
                     )}
@@ -186,15 +185,15 @@ export default function NewGroupPage() {
           </div>
         </div>
 
-        {/* Submit — fixed at bottom */}
-        <div className="px-5 pb-8 mt-auto sticky bottom-0 bg-[#0A0E1A] border-t border-[#1e2a40]/50 pt-4">
+        {/* Submit */}
+        <div className="px-5 pb-8 mt-auto sticky bottom-0 border-t pt-4" style={{ background: '#0c0c0c', borderColor: 'rgba(255,255,255,0.08)' }}>
           <button
             type="submit"
             disabled={loading || !name.trim() || selectedMembers.length < 1}
             className="btn-primary flex items-center justify-center gap-2"
           >
             {loading ? (
-              <span className="w-5 h-5 border-2 border-bg/30 border-t-bg rounded-full animate-spin" />
+              <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
             ) : (
               'Create Group'
             )}

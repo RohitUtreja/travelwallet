@@ -79,8 +79,8 @@ export default function SettlePage() {
 
   if (initing) {
     return (
-      <div className="min-h-dvh bg-bg flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+      <div className="min-h-dvh flex items-center justify-center" style={{ background: '#0c0c0c' }}>
+        <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(204,255,0,0.3)', borderTopColor: '#ccff00' }} />
       </div>
     )
   }
@@ -90,84 +90,89 @@ export default function SettlePage() {
       <Toast toasts={toasts} />
 
       {/* Header */}
-      <header className="flex items-center gap-3 px-5 pt-6 pb-4 safe-area-top border-b border-[#1e2a40]/50 sticky top-0 z-30 bg-[#0A0E1A]">
+      <header className="flex items-center gap-3 px-5 pt-6 pb-4 safe-area-top border-b sticky top-0 z-30" style={{ background: '#0c0c0c', borderColor: 'rgba(255,255,255,0.08)' }}>
         <button
           onClick={() => router.back()}
-          className="w-10 h-10 rounded-xl bg-[#1a2234] border border-[#1e2a40] flex items-center justify-center flex-shrink-0 min-h-[44px]"
+          className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0 min-h-[44px]"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F1F5F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ebebeb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
         </button>
-        <h1 className="text-lg font-bold text-[#F1F5F9]">Settle Up</h1>
+        <h1 className="mono text-xs tracking-[0.15em] uppercase" style={{ color: '#ebebeb' }}>SETTLE UP</h1>
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-5 py-10">
-        {/* Settlement visualization — centered */}
         <div className="w-full max-w-sm flex flex-col items-center gap-8 animate-fade-in">
-          <p className="text-[#64748B] text-sm text-center">Recording the following settlement:</p>
 
-          {/* From → amount → To */}
-          <div className="flex items-center gap-4 w-full justify-center">
-            {/* From */}
-            <div className="flex flex-col items-center gap-2">
-              <div
-                className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold border-2"
-                style={{
-                  backgroundColor: fromProfile?.avatar_color ?? avatarBg(fromProfile?.name ?? ''),
-                  borderColor: isMyDebt ? '#FF6B6B' : 'transparent',
-                }}
-              >
-                {getInitial(fromProfile?.name ?? '?')}
-              </div>
-              <p className={`text-sm font-semibold ${isMyDebt ? 'text-[#FF6B6B]' : 'text-[#F1F5F9]'}`}>
-                {isMyDebt ? 'You' : fromProfile?.name}
-              </p>
-            </div>
-
-            {/* Arrow */}
-            <div className="flex flex-col items-center gap-1 flex-1">
-              <div className="flex items-center gap-1 w-full justify-center">
-                <div className="h-px flex-1 bg-[#1e2a40]" />
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00D4AA" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-                </svg>
-                <div className="h-px flex-1 bg-[#1e2a40]" />
-              </div>
-              <p className="text-[#64748B] text-xs">pays</p>
-            </div>
-
-            {/* To */}
-            <div className="flex flex-col items-center gap-2">
-              <div
-                className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold border-2"
-                style={{
-                  backgroundColor: toProfile?.avatar_color ?? avatarBg(toProfile?.name ?? ''),
-                  borderColor: isMyCredit ? '#00D4AA' : 'transparent',
-                }}
-              >
-                {getInitial(toProfile?.name ?? '?')}
-              </div>
-              <p className={`text-sm font-semibold ${isMyCredit ? 'text-[#00D4AA]' : 'text-[#F1F5F9]'}`}>
-                {isMyCredit ? 'You' : toProfile?.name}
-              </p>
-            </div>
-          </div>
-
-          {/* Big amount in accent */}
-          <p className="text-4xl font-extrabold text-[#00D4AA] amount-display">
-            {formatCurrency(amountParam, group?.currency ?? 'EUR')}
-          </p>
-
-          {/* Context note */}
-          <div className="w-full bg-[#111827] rounded-xl border border-[#1e2a40]/50 p-3 text-center">
-            <p className="text-[#64748B] text-xs">
-              {isMyDebt
-                ? `You are confirming that you have paid ${toProfile?.name} ${formatCurrency(amountParam, group?.currency ?? 'EUR')}.`
-                : isMyCredit
-                ? `You are confirming that ${fromProfile?.name} has paid you ${formatCurrency(amountParam, group?.currency ?? 'EUR')}.`
-                : `Recording that ${fromProfile?.name} paid ${toProfile?.name} ${formatCurrency(amountParam, group?.currency ?? 'EUR')}.`}
+          {/* Center glass card */}
+          <div className="card w-full flex flex-col items-center gap-6 py-8">
+            <p className="mono text-[10px] text-center" style={{ color: 'rgba(235,235,235,0.4)', letterSpacing: '0.1em' }}>
+              RECORDING SETTLEMENT
             </p>
+
+            {/* Avatar row */}
+            <div className="flex items-center gap-3 w-full justify-center">
+              {/* From */}
+              <div className="flex flex-col items-center gap-2">
+                <div
+                  className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold"
+                  style={{
+                    backgroundColor: fromProfile?.avatar_color ?? avatarBg(fromProfile?.name ?? ''),
+                    border: isMyDebt ? '2px solid #ff4d4d' : '2px solid transparent',
+                    color: '#000',
+                  }}
+                >
+                  {getInitial(fromProfile?.name ?? '?')}
+                </div>
+                <p className="text-xs font-semibold" style={{ fontFamily: "'Space Grotesk', sans-serif", color: isMyDebt ? '#ff4d4d' : '#ebebeb' }}>
+                  {isMyDebt ? 'You' : fromProfile?.name}
+                </p>
+              </div>
+
+              {/* Amount + arrow */}
+              <div className="flex flex-col items-center gap-1 flex-1">
+                <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: '1.75rem', color: '#ccff00', letterSpacing: '-0.04em' }}>
+                  {formatCurrency(amountParam, group?.currency ?? 'EUR')}
+                </p>
+                <div className="flex items-center gap-1 w-full justify-center">
+                  <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.08)' }} />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccff00" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                  <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.08)' }} />
+                </div>
+                <p className="mono text-[10px]" style={{ color: 'rgba(235,235,235,0.3)' }}>pays</p>
+              </div>
+
+              {/* To */}
+              <div className="flex flex-col items-center gap-2">
+                <div
+                  className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold"
+                  style={{
+                    backgroundColor: toProfile?.avatar_color ?? avatarBg(toProfile?.name ?? ''),
+                    border: isMyCredit ? '2px solid #ccff00' : '2px solid transparent',
+                    color: '#000',
+                  }}
+                >
+                  {getInitial(toProfile?.name ?? '?')}
+                </div>
+                <p className="text-xs font-semibold" style={{ fontFamily: "'Space Grotesk', sans-serif", color: isMyCredit ? '#ccff00' : '#ebebeb' }}>
+                  {isMyCredit ? 'You' : toProfile?.name}
+                </p>
+              </div>
+            </div>
+
+            {/* Context note */}
+            <div className="w-full rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <p className="mono text-[10px]" style={{ color: 'rgba(235,235,235,0.4)', lineHeight: 1.6 }}>
+                {isMyDebt
+                  ? `You are confirming that you have paid ${toProfile?.name} ${formatCurrency(amountParam, group?.currency ?? 'EUR')}.`
+                  : isMyCredit
+                  ? `You are confirming that ${fromProfile?.name} has paid you ${formatCurrency(amountParam, group?.currency ?? 'EUR')}.`
+                  : `Recording that ${fromProfile?.name} paid ${toProfile?.name} ${formatCurrency(amountParam, group?.currency ?? 'EUR')}.`}
+              </p>
+            </div>
           </div>
 
           <div className="w-full flex flex-col gap-3">
@@ -177,7 +182,7 @@ export default function SettlePage() {
               className="btn-primary flex items-center justify-center gap-2"
             >
               {loading ? (
-                <span className="w-5 h-5 border-2 border-bg/30 border-t-bg rounded-full animate-spin" />
+                <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
               ) : (
                 'Confirm Settlement'
               )}
