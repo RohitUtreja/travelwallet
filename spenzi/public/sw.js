@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spenzi-v2'
+const CACHE_NAME = 'familywallet-v1'
 const STATIC_ASSETS = [
   '/',
   '/groups',

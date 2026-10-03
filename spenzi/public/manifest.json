@@ -1,6 +1,6 @@
 {
-  "name": "Spenzi",
-  "short_name": "Spenzi",
+  "name": "FamilyWallet",
+  "short_name": "FamilyWallet",
   "description": "Split costs with friends or track your family spending",
   "start_url": "/",
   "display": "standalone",

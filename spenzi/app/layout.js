@@ -1,13 +1,13 @@
 import './globals.css'
 
 export const metadata = {
-  title: 'Spenzi',
+  title: 'FamilyWallet',
   description: 'Split costs with friends or track your family spending',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Spenzi',
+    title: 'FamilyWallet',
   },
   icons: {
     apple: '/icon-192.png',

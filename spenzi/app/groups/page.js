@@ -113,10 +113,10 @@ export default function GroupsPage() {
       <header className="flex items-center justify-between px-5 pt-6 pb-4 safe-area-top sticky top-0 z-30 border-b" style={{ background: '#0c0c0c', borderColor: 'rgba(255,255,255,0.08)' }}>
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#ccff00' }}>
-            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '14px', color: '#000' }}>S</span>
+            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '14px', color: '#000' }}>F</span>
           </div>
           <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '18px', color: '#ebebeb', letterSpacing: '-0.02em' }}>
-            Spenzi
+            FamilyWallet
           </h1>
         </div>
         <button

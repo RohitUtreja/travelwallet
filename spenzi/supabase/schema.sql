@@ -1,5 +1,5 @@
 -- ============================================================
--- Spenzi – Supabase Database Schema
+-- FamilyWallet – Supabase Database Schema
 -- Run this in the Supabase SQL editor for your project
 -- ============================================================
 

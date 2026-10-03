@@ -55,7 +55,7 @@ export default function LoginPage() {
           <span style={{ fontSize: '2.5rem' }}>💸</span>
         </div>
         <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '2.5rem', fontWeight: 700, letterSpacing: '-0.04em', color: '#ebebeb', lineHeight: 1 }}>
-          Spenzi
+          FamilyWallet
         </h1>
         <p className="mt-2 text-sm text-center" style={{ color: 'rgba(235,235,235,0.4)' }}>
           Split smarter, travel together
