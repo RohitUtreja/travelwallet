@@ -51,7 +51,8 @@ export default function AddExpensePage() {
     )
   }
 
-  const effectiveSplitMembers =
+  const isFamily = group?.type === 'family'
+  const effectiveSplitMembers = isFamily ? [] :
     splitMode === 'equal' ? members.map((m) => m.user_id) : customSplitMembers
 
   async function handleSubmit(e) {
@@ -61,7 +62,7 @@ export default function AddExpensePage() {
       showToast('Please enter a valid amount', 'error')
       return
     }
-    if (effectiveSplitMembers.length === 0) {
+    if (!isFamily && effectiveSplitMembers.length === 0) {
       showToast('Select at least one member to split with', 'error')
       return
     }
@@ -85,6 +86,11 @@ export default function AddExpensePage() {
     if (expenseError) {
       showToast(expenseError.message, 'error')
       setLoading(false)
+      return
+    }
+
+    if (isFamily) {
+      router.push(`/groups/${groupId}`)
       return
     }
 
@@ -207,7 +213,7 @@ export default function AddExpensePage() {
 
           {/* Paid by */}
           <div className="flex flex-col">
-            <label className="section-label">// Paid By</label>
+            <label className="section-label">// {isFamily ? 'Spent By' : 'Paid By'}</label>
             <div className="flex flex-col gap-2">
               {members.map((m) => (
                 <button
@@ -241,6 +247,7 @@ export default function AddExpensePage() {
           </div>
 
           {/* Split */}
+          {!isFamily && (
           <div className="flex flex-col">
             <label className="section-label">// Split</label>
             <div className="flex gap-2 mb-3">
@@ -303,13 +310,14 @@ export default function AddExpensePage() {
               </div>
             )}
           </div>
+          )}
         </div>
 
         {/* Submit */}
         <div className="px-5 pb-8 sticky bottom-0 border-t pt-4" style={{ background: '#0c0c0c', borderColor: 'rgba(255,255,255,0.08)' }}>
           <button
             type="submit"
-            disabled={loading || !amount || effectiveSplitMembers.length === 0}
+            disabled={loading || !amount || (!isFamily && effectiveSplitMembers.length === 0)}
             className="btn-primary flex items-center justify-center gap-2"
           >
             {loading ? (

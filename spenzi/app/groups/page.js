@@ -158,7 +158,7 @@ export default function GroupsPage() {
                 >
                   {/* Group icon */}
                   <div className="glass w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">
-                    ✈️
+                    {group.type === 'family' ? '🏡' : '✈️'}
                   </div>
 
                   {/* Details */}
@@ -178,7 +178,9 @@ export default function GroupsPage() {
 
                   {/* Balance */}
                   <div className="flex-shrink-0 text-right flex flex-col items-end gap-0.5">
-                    {Math.abs(balance) < 0.01 ? (
+                    {group.type === 'family' ? (
+                      <p className="mono text-[10px]" style={{ color: '#ccff00' }}>FAMILY</p>
+                    ) : Math.abs(balance) < 0.01 ? (
                       <p className="mono text-[11px]" style={{ color: 'rgba(235,235,235,0.3)' }}>SETTLED</p>
                     ) : balance > 0 ? (
                       <>

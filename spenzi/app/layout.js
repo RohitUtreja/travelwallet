@@ -2,7 +2,7 @@ import './globals.css'
 
 export const metadata = {
   title: 'Spenzi',
-  description: 'Split smarter, travel together',
+  description: 'Split costs with friends or track your family spending',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -19,7 +19,7 @@ export const viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   maximumScale: 1,
-  themeColor: '#0A0E1A',
+  themeColor: '#0c0c0c',
 }
 
 export default function RootLayout({ children }) {

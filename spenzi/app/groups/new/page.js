@@ -15,6 +15,7 @@ export default function NewGroupPage() {
   const [allProfiles, setAllProfiles] = useState([])
   const [name, setName] = useState('')
   const [currency, setCurrency] = useState('EUR')
+  const [type, setType] = useState('split')
   const [selectedMembers, setSelectedMembers] = useState([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
@@ -58,7 +59,7 @@ export default function NewGroupPage() {
 
     const { data: group, error: groupError } = await supabase
       .from('groups')
-      .insert({ name: name.trim(), currency, created_by: currentUser.id })
+      .insert({ name: name.trim(), currency, type, created_by: currentUser.id })
       .select()
       .single()
 
@@ -101,13 +102,36 @@ export default function NewGroupPage() {
 
       <form onSubmit={handleCreate} className="flex-1 flex flex-col overflow-y-auto">
         <div className="flex flex-col gap-6 px-5 py-6">
+          {/* Group type */}
+          <div className="flex flex-col">
+            <label className="section-label">// Type</label>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { key: 'split', icon: '🤝', title: 'Split', desc: 'Share costs & settle up' },
+                { key: 'family', icon: '🏡', title: 'Family', desc: 'Track shared household spend' },
+              ].map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setType(t.key)}
+                  className="card flex flex-col items-start gap-1 text-left min-h-[88px] transition-all active:scale-[0.98]"
+                  style={type === t.key ? { border: '1px solid rgba(204,255,0,0.5)', background: 'rgba(204,255,0,0.06)' } : {}}
+                >
+                  <span className="text-2xl">{t.icon}</span>
+                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, color: type === t.key ? '#ccff00' : '#ebebeb' }}>{t.title}</span>
+                  <span className="mono text-[10px]" style={{ color: 'rgba(235,235,235,0.4)' }}>{t.desc}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Group name */}
           <div className="flex flex-col">
             <label className="section-label">// Group Name</label>
             <input
               type="text"
               className="input-field"
-              placeholder="e.g. Bali 2025"
+              placeholder={type === 'family' ? 'e.g. Utreja Household' : 'e.g. Bali 2025'}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required

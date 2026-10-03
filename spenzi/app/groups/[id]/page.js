@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase'
 import { computeBalances, simplifyDebts, getInitial, avatarBg } from '@/lib/utils'
 import ExpenseCard from '@/components/ExpenseCard'
 import BalanceCard from '@/components/BalanceCard'
+import SpendSummary from '@/components/SpendSummary'
 import Toast, { useToast } from '@/components/Toast'
 
 export default function GroupDetailPage() {
@@ -48,6 +49,8 @@ export default function GroupDetailPage() {
     setGroup(groupData)
     setMembers(membersData ?? [])
     setExpenses(expensesData ?? [])
+
+    if (groupData.type === 'family') { setLoading(false); return }
 
     const allSplits = (expensesData ?? []).flatMap((e) =>
       (e.expense_splits ?? []).map((s) => ({ ...s, expense_id: e.id }))
@@ -140,7 +143,7 @@ export default function GroupDetailPage() {
 
         {/* Tab bar */}
         <div className="flex gap-0 pb-0">
-          {['expenses', 'balances'].map((t) => (
+          {['expenses', group?.type === 'family' ? 'summary' : 'balances'].map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -150,7 +153,7 @@ export default function GroupDetailPage() {
                 letterSpacing: '0.1em',
               }}
             >
-              {t === 'expenses' ? `EXPENSES (${expenses.length})` : `BALANCES (${transactions.length})`}
+              {t === 'expenses' ? `EXPENSES (${expenses.length})` : t === 'summary' ? 'SUMMARY' : `BALANCES (${transactions.length})`}
               {tab === t && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: '#ccff00' }} />
               )}
@@ -182,6 +185,8 @@ export default function GroupDetailPage() {
             )}
           </div>
         )}
+
+        {tab === 'summary' && <SpendSummary groupId={id} currency={group?.currency} />}
 
         {tab === 'balances' && (
           <div className="flex flex-col gap-3">

@@ -1,7 +1,11 @@
-const CACHE_NAME = 'spenzi-v1'
+const CACHE_NAME = 'spenzi-v2'
 const STATIC_ASSETS = [
   '/',
   '/groups',
+  '/tracker',
+  '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png',
   '/login',
 ]
 
