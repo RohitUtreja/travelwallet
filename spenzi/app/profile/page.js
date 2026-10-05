@@ -1,172 +1,130 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Form, RadioGroup, Radio, Label } from 'react-aria-components'
+import { LogOut, Lock, Check } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
-import { getInitial, avatarBg } from '@/lib/utils'
+import { createPinStore } from '@/lib/pin'
+import { AVATAR_COLORS } from '@/lib/utils'
+import { useSession } from '@/lib/useSession'
 import BottomNav from '@/components/BottomNav'
-import Toast, { useToast } from '@/components/Toast'
+import PageHeader from '@/components/PageHeader'
+import Keypad from '@/components/Keypad'
+import { Avatar } from '@/components/ui/Avatar'
+import { Button } from '@/components/ui/Button'
+import { Sheet, ConfirmSheet } from '@/components/ui/Sheet'
+import { Skeleton } from '@/components/ui/Skeleton'
+import { Switch } from '@/components/ui/Switch'
+import { TextField } from '@/components/ui/TextField'
+import { useToast } from '@/components/ui/Toast'
 
-const AVATAR_COLORS = [
-  '#ccff00', '#10b981', '#4A90E2', '#ff4d4d', '#FFB547', '#A29BFE',
-  '#50E3C2', '#FF9F43', '#EE5A24', '#7B68EE',
-]
+function PinSetup({ store, isOpen, onOpenChange, onDone }) {
+  const { show } = useToast()
+  const [first, setFirst] = useState('')
+  const [digits, setDigits] = useState('')
+  const [step, setStep] = useState('create')
 
-export default function ProfilePage() {
-  const router = useRouter()
-  const { toasts, showToast } = useToast()
-  const [user, setUser] = useState(null)
-  const [profile, setProfile] = useState(null)
-  const [name, setName] = useState('')
-  const [avatarColor, setAvatarColor] = useState('#ccff00')
-  const [loading, setLoading] = useState(false)
-  const [initing, setIniting] = useState(true)
+  useEffect(() => { if (isOpen) { setFirst(''); setDigits(''); setStep('create') } }, [isOpen])
 
-  const init = useCallback(async () => {
-    const supabase = createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) { router.replace('/login'); return }
-    setUser(session.user)
-
-    const { data: prof } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', session.user.id)
-      .single()
-
-    if (prof) {
-      setProfile(prof)
-      setName(prof.name ?? '')
-      setAvatarColor(prof.avatar_color ?? '#ccff00')
-    }
-
-    setIniting(false)
-  }, [router])
-
-  useEffect(() => {
-    init()
-  }, [init])
-
-  async function handleSave(e) {
-    e.preventDefault()
-    if (!name.trim()) return
-    setLoading(true)
-
-    const supabase = createClient()
-    const { error } = await supabase
-      .from('profiles')
-      .update({ name: name.trim(), avatar_color: avatarColor })
-      .eq('id', user.id)
-
-    if (error) {
-      showToast(error.message, 'error')
-    } else {
-      showToast('Profile updated', 'success')
-    }
-
-    setLoading(false)
+  async function press(k) {
+    if (k === 'back') return setDigits((d) => d.slice(0, -1))
+    const next = (digits + k).slice(0, 6)
+    setDigits(next)
   }
-
-  async function handleSignOut() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.replace('/login')
-  }
-
-  if (initing) {
-    return (
-      <div className="min-h-dvh flex items-center justify-center" style={{ background: '#0c0c0c' }}>
-        <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(204,255,0,0.3)', borderTopColor: '#ccff00' }} />
-      </div>
-    )
+  async function advance() {
+    if (step === 'create') { setFirst(digits); setDigits(''); setStep('confirm'); return }
+    if (digits !== first) { show('PINs didn’t match — start again', { type: 'error' }); setFirst(''); setDigits(''); setStep('create'); return }
+    await store.set(digits)
+    onDone()
+    onOpenChange(false)
+    show('App lock turned on', { type: 'success' })
   }
 
   return (
-    <div className="page-container">
-      <Toast toasts={toasts} />
-
-      {/* Header */}
-      <header className="flex items-center px-5 pt-6 pb-4 safe-area-top border-b sticky top-0 z-30" style={{ background: '#0c0c0c', borderColor: 'rgba(255,255,255,0.08)' }}>
-        <h1 className="mono text-xs tracking-[0.15em] uppercase" style={{ color: '#ebebeb' }}>PROFILE</h1>
-      </header>
-
-      <main className="flex-1 px-5 py-6 overflow-y-auto" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}>
-        {/* Avatar centered */}
-        <div className="flex flex-col items-center mb-8">
-          <div
-            className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold mb-3"
-            style={{ backgroundColor: avatarColor, color: '#000' }}
-          >
-            {getInitial(name || user?.email || '?')}
-          </div>
-          <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: '18px', color: '#ebebeb' }}>
-            {name || 'Your name'}
-          </p>
-          <p className="text-sm mt-1" style={{ color: 'rgba(235,235,235,0.4)' }}>{user?.email}</p>
+    <Sheet isOpen={isOpen} onOpenChange={onOpenChange} title={step === 'create' ? 'Create a PIN' : 'Confirm your PIN'}
+      footer={<Button size="lg" isDisabled={digits.length < 4} onPress={advance}>{step === 'create' ? 'Continue' : 'Turn on lock'}</Button>}>
+      <div className="flex flex-col items-center gap-4 pb-4">
+        <p className="text-sm text-muted">4–6 digits. Asked when you open the app or return after 30 seconds.</p>
+        <div className="flex h-4 gap-3" role="img" aria-label={`${digits.length} digits entered`}>
+          {Array.from({ length: Math.max(4, digits.length) }, (_, i) => <span key={i} className={`h-3 w-3 rounded-full border border-gold/60 ${i < digits.length ? 'bg-gold' : ''}`} />)}
         </div>
+        <Keypad decimal={false} onKey={press} className="w-72" />
+      </div>
+    </Sheet>
+  )
+}
 
-        <form onSubmit={handleSave} className="flex flex-col gap-6">
-          {/* Name */}
-          <div className="flex flex-col">
-            <label className="section-label">// Display Name</label>
-            <input
-              type="text"
-              className="input-field"
-              placeholder="Your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              maxLength={50}
-            />
-          </div>
+export default function ProfilePage() {
+  const router = useRouter()
+  const { user } = useSession()
+  const { show } = useToast()
+  const store = useMemo(() => createPinStore(), [])
+  const [profile, setProfile] = useState(null)
+  const [name, setName] = useState('')
+  const [color, setColor] = useState(AVATAR_COLORS[0])
+  const [pending, setPending] = useState(false)
+  const [lockOn, setLockOn] = useState(false)
+  const [setup, setSetup] = useState(false)
+  const [confirmOff, setConfirmOff] = useState(false)
 
-          {/* Avatar color */}
-          <div className="flex flex-col">
-            <label className="section-label">// Avatar Color</label>
-            <div className="flex flex-wrap gap-3">
-              {AVATAR_COLORS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => setAvatarColor(color)}
-                  className="w-10 h-10 rounded-full transition-transform active:scale-90 min-h-[44px] min-w-[44px]"
-                  style={{
-                    backgroundColor: color,
-                    outline: avatarColor === color ? `3px solid rgba(255,255,255,0.8)` : 'none',
-                    outlineOffset: '2px',
-                  }}
-                />
-              ))}
+  useEffect(() => { setLockOn(store.isEnabled()) }, [store])
+  useEffect(() => {
+    if (!user) return
+    createClient().from('profiles').select('*').eq('id', user.id).single().then(({ data }) => {
+      if (data) { setProfile(data); setName(data.name ?? ''); setColor(AVATAR_COLORS.includes(data.avatar_color) ? data.avatar_color : data.avatar_color ?? AVATAR_COLORS[0]) }
+    })
+  }, [user])
+
+  async function save() {
+    setPending(true)
+    const { error } = await createClient().from('profiles').update({ name: name.trim(), avatar_color: color }).eq('id', user.id)
+    setPending(false)
+    if (error) show(error.message, { type: 'error' }); else show('Profile saved', { type: 'success' })
+  }
+  async function signOut() {
+    await createClient().auth.signOut()
+    router.replace('/login')
+  }
+
+  const colors = AVATAR_COLORS.includes(color) ? AVATAR_COLORS : [color, ...AVATAR_COLORS]
+
+  return (
+    <div className="page pb-32">
+      <PageHeader eyebrow="Account" title="Profile" />
+      <main className="flex flex-col gap-8 px-5 py-6">
+        {!profile ? <Skeleton className="h-64" /> : (
+          <Form onSubmit={(e) => { e.preventDefault(); save() }} className="flex flex-col gap-6">
+            <div className="flex flex-col items-center gap-3">
+              <Avatar name={name || user?.email} color={color} size={84} />
+              <p className="text-sm text-muted">{user?.email}</p>
             </div>
-          </div>
+            <TextField label="Display name" value={name} onChange={setName} isRequired maxLength={40} autoComplete="name" />
+            <RadioGroup value={color} onChange={setColor} className="flex flex-col gap-3">
+              <Label className="eyebrow">Avatar colour</Label>
+              <div className="flex flex-wrap gap-3">
+                {colors.map((c) => (
+                  <Radio key={c} value={c} aria-label={c} className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full outline-none ring-offset-2 ring-offset-shell transition data-[selected]:ring-2 data-[selected]:ring-gold-soft data-[focus-visible]:ring-2 data-[focus-visible]:ring-ivory" style={{ background: c }}>
+                    {({ isSelected }) => isSelected && <Check aria-hidden size={18} className="text-ink" />}
+                  </Radio>
+                ))}
+              </div>
+            </RadioGroup>
+            <Button type="submit" size="lg" isPending={pending}>Save changes</Button>
+          </Form>
+        )}
 
-          <button
-            type="submit"
-            disabled={loading || !name.trim()}
-            className="btn-primary flex items-center justify-center gap-2 mt-2"
-          >
-            {loading ? (
-              <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-            ) : (
-              'Save Changes'
-            )}
-          </button>
-        </form>
+        <section className="card flex flex-col gap-3">
+          <div className="flex items-center gap-2 text-gold-soft"><Lock aria-hidden size={16} /><h2 className="eyebrow !text-gold-soft">Privacy</h2></div>
+          <Switch isSelected={lockOn} onChange={(on) => (on ? setSetup(true) : setConfirmOff(true))}>App lock (PIN)</Switch>
+          <p className="text-xs leading-relaxed text-faint">Hides the app on this device. It’s a privacy screen, not encryption — sign out on shared devices.</p>
+        </section>
 
-        {/* Account section */}
-        <div className="mt-10 pt-6 border-t" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-          <p className="section-label mb-4">// Account</p>
-          <button
-            onClick={handleSignOut}
-            className="w-full py-4 rounded-full font-semibold text-sm transition-all active:scale-95 hover:opacity-80 min-h-[44px]"
-            style={{ border: '1px solid rgba(255,77,77,0.4)', color: '#ff4d4d', background: 'rgba(255,77,77,0.04)', fontFamily: "'Space Grotesk', sans-serif" }}
-          >
-            SIGN OUT
-          </button>
-        </div>
-
-        <p className="mono text-center text-[10px] mt-8" style={{ color: 'rgba(235,235,235,0.2)' }}>SPENZI v1.0</p>
+        <Button variant="danger" size="lg" onPress={signOut}><LogOut aria-hidden size={16} /> Sign out</Button>
+        <p className="text-center text-xs text-faint">FamilyWallet</p>
       </main>
 
+      <PinSetup store={store} isOpen={setup} onOpenChange={setSetup} onDone={() => setLockOn(true)} />
+      <ConfirmSheet isOpen={confirmOff} onOpenChange={setConfirmOff} title="Turn off app lock?" message="Anyone who opens the app on this device will see your wallets." confirmLabel="Turn off" danger onConfirm={() => { store.clear(); setLockOn(false) }} />
       <BottomNav />
     </div>
   )

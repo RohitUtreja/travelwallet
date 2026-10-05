@@ -1,6 +1,7 @@
 -- ============================================================
--- Spenzi – Supabase Database Schema
--- Run this in the Supabase SQL editor for your project
+-- FamilyWallet – Supabase Database Schema
+-- Run this in the Supabase SQL editor for your project, then run
+-- migrations/003_wallet_platform.sql (roles, invites, budgets, recurring, RPCs, RLS rewrite).
 -- ============================================================
 
 -- ── profiles (extends auth.users) ───────────────────────────
@@ -16,6 +17,7 @@ create table if not exists groups (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   currency text not null,
+  type text not null default 'split' check (type in ('split', 'family')),
   created_by uuid references profiles(id),
   created_at timestamptz default now()
 );
@@ -218,3 +220,49 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- ============================================================
+-- Spend summary (family analytics) — see migrations/002_family_groups.sql
+-- ============================================================
+-- Spend summary for one group over a date range, computed in Postgres.
+-- security invoker => existing RLS applies, so only members get data.
+-- Returns: total, count, by_category[], by_member[], by_month[] (6 months ending p_to)
+create or replace function public.group_spend_summary(p_group uuid, p_from date, p_to date)
+returns jsonb
+language sql
+stable
+security invoker
+set search_path = public
+as $$
+  with e as (
+    select * from expenses
+    where group_id = p_group and date between p_from and p_to
+  )
+  select jsonb_build_object(
+    'total', coalesce((select sum(amount) from e), 0),
+    'count', (select count(*) from e),
+    'by_category', coalesce((
+      select jsonb_agg(jsonb_build_object('category', category, 'total', t) order by t desc)
+      from (select category, sum(amount) as t from e group by category) c
+    ), '[]'::jsonb),
+    'by_member', coalesce((
+      select jsonb_agg(jsonb_build_object('user_id', uid, 'name', name, 'total', t) order by t desc)
+      from (
+        select e.paid_by as uid, p.name, sum(e.amount) as t
+        from e join profiles p on p.id = e.paid_by
+        group by e.paid_by, p.name
+      ) m
+    ), '[]'::jsonb),
+    'by_month', coalesce((
+      select jsonb_agg(jsonb_build_object('month', mo, 'total', t) order by mo)
+      from (
+        select to_char(date_trunc('month', date), 'YYYY-MM') as mo, sum(amount) as t
+        from expenses
+        where group_id = p_group
+          and date >= (date_trunc('month', p_to) - interval '5 months')::date
+          and date <= p_to
+        group by 1
+      ) x
+    ), '[]'::jsonb)
+  );
+$$;

@@ -1,87 +1,57 @@
-const CACHE_NAME = 'spenzi-v1'
-const STATIC_ASSETS = [
-  '/',
-  '/groups',
-  '/login',
-]
+// FamilyWallet service worker.
+// Rules: never touch cross-origin traffic (Supabase API/auth, fonts) or non-GET requests.
+// Pages are network-first (fall back to cache offline); hashed Next assets are cache-first;
+// other same-origin files are stale-while-revalidate.
+const CACHE = 'familywallet-v2'
+const SHELL = ['/', '/login', '/groups', '/manifest.json', '/icon-192.png', '/icon-512.png']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS).catch(() => {
-        // Non-fatal: some assets may not be available during install
-      })
-    })
+    caches.open(CACHE).then((c) => Promise.allSettled(SHELL.map((u) => c.add(u)))).then(() => self.skipWaiting())
   )
-  self.skipWaiting()
 })
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
-      )
-    })
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
   )
-  self.clients.claim()
 })
+
+const put = (request, response) => {
+  if (response && response.ok && response.type === 'basic') {
+    const copy = response.clone()
+    caches.open(CACHE).then((c) => c.put(request, copy))
+  }
+  return response
+}
 
 self.addEventListener('fetch', (event) => {
   const { request } = event
-  const url = new URL(request.url)
-
-  // Skip non-GET requests
   if (request.method !== 'GET') return
+  const url = new URL(request.url)
+  if (url.origin !== self.location.origin) return // API, auth, fonts: always the network
 
-  // Skip Supabase API calls — always go to network
-  if (url.hostname.includes('supabase.co')) return
-
-  // Skip Next.js internal routes
-  if (url.pathname.startsWith('/_next/')) {
+  // page navigations
+  if (request.mode === 'navigate') {
     event.respondWith(
-      caches.open(CACHE_NAME).then((cache) => {
-        return cache.match(request).then((cached) => {
-          if (cached) return cached
-          return fetch(request).then((response) => {
-            if (response.ok) cache.put(request, response.clone())
-            return response
-          })
-        })
-      })
+      fetch(request).then((r) => put(request, r)).catch(() => caches.match(request).then((c) => c || caches.match('/')))
     )
     return
   }
 
-  // Network-first for HTML pages
-  if (request.headers.get('accept')?.includes('text/html')) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response.ok) {
-            const clone = response.clone()
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone))
-          }
-          return response
-        })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match('/')))
-    )
+  // immutable, content-hashed build output
+  if (url.pathname.startsWith('/_next/static/')) {
+    event.respondWith(caches.match(request).then((c) => c || fetch(request).then((r) => put(request, r))))
     return
   }
 
-  // Cache-first for everything else
+  // everything else same-origin: serve cached, refresh in background
   event.respondWith(
     caches.match(request).then((cached) => {
-      if (cached) return cached
-      return fetch(request).then((response) => {
-        if (response.ok) {
-          const clone = response.clone()
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone))
-        }
-        return response
-      })
+      const network = fetch(request).then((r) => put(request, r)).catch(() => cached)
+      return cached || network
     })
   )
 })

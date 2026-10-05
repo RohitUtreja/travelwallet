@@ -1,3 +1,5 @@
 .next/
 node_modules/
 .env.local
+tests/e2e/shots/
+tests/e2e/ids.env

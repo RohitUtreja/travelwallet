@@ -2,24 +2,16 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { Spinner } from '@/components/ui/Button'
 
 export default function RootPage() {
   const router = useRouter()
-
   useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        router.replace('/groups')
-      } else {
-        router.replace('/login')
-      }
-    })
+    createClient().auth.getSession().then(({ data: { session } }) => router.replace(session ? '/groups' : '/login'))
   }, [router])
-
   return (
-    <div className="min-h-dvh bg-bg flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+    <div className="flex min-h-dvh items-center justify-center text-gold">
+      <Spinner className="h-7 w-7" />
     </div>
   )
 }
