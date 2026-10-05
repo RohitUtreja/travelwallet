@@ -23,6 +23,15 @@ Tailwind · Supabase (Auth + Postgres + RLS).
    automatically. Existing users join wallets by invite link or by an admin adding them.
 4. `npm install && npm run dev`. Deploy over HTTPS (e.g. Vercel) so the app is installable.
 
+## Deploy on Vercel
+
+1. Import the repo and set **Root Directory** to `spenzi` (the app lives in a subfolder).
+2. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` under *Environment Variables*
+   **before the first build** — Next inlines `NEXT_PUBLIC_*` values at build time, so changing them
+   later needs a redeploy.
+3. Deploy. The default Next.js build settings work; no `vercel.json` is needed. Vercel serves HTTPS,
+   which the PWA install and service worker require.
+
 ## Concepts
 
 | | |
