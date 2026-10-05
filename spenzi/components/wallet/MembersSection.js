@@ -65,13 +65,13 @@ export default function MembersSection({ group, members, user, isAdmin, reload }
               <Avatar name={name} color={m.profiles?.avatar_color} />
               <span className="min-w-0 flex-1 truncate text-[15px]">{name}{self && <span className="text-faint"> (you)</span>}</span>
               {isAdmin ? (
-                <Select aria-label={`Role for ${name}`} items={ROLES} selectedKey={m.role} onSelectionChange={(r) => r !== m.role && changeRole(m.user_id, r)} compact className="w-32" />
+                <Select aria-label={`Role for ${name}`} items={ROLES} selectedKey={m.role} onSelectionChange={(r) => r !== m.role && changeRole(m.user_id, r)} compact className="w-28 shrink-0" />
               ) : (
                 <span className="rounded-full border border-line px-2.5 py-1 text-[11px] uppercase tracking-wider text-muted">{ROLES.find((r) => r.id === m.role)?.label}</span>
               )}
-              {isAdmin && !self && (
-                <IconButton label={`Remove ${name}`} variant="quiet" onPress={() => setRemoving(m)}><UserMinus size={18} /></IconButton>
-              )}
+              {isAdmin && (self
+                ? <span aria-hidden className="h-11 w-11 shrink-0" />
+                : <IconButton label={`Remove ${name}`} variant="quiet" onPress={() => setRemoving(m)}><UserMinus size={18} /></IconButton>)}
             </li>
           )
         })}

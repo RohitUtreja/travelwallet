@@ -10,9 +10,9 @@ export function Select({ label, items, className, placeholder = 'Select…', com
       {label && <Label className="eyebrow">{label}</Label>}
       <Button
         className={cx(
-          'flex w-full items-center justify-between gap-2 rounded-2xl border border-line bg-white/[0.04] px-4 text-left text-[15px] text-ivory outline-none transition',
+          'flex w-full items-center justify-between gap-2 rounded-2xl border border-line bg-white/[0.04] text-left text-[15px] text-ivory outline-none transition',
           'data-[focus-visible]:border-gold/70 data-[focus-visible]:ring-4 data-[focus-visible]:ring-gold/10 data-[pressed]:bg-white/10',
-          compact ? 'h-10 text-sm' : 'h-12'
+          compact ? 'h-10 gap-1 px-3 text-sm' : 'h-12 px-4'
         )}
       >
         <SelectValue className="truncate data-[placeholder]:text-faint" />

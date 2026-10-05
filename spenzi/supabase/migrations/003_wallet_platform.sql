@@ -31,6 +31,8 @@ create index if not exists expenses_group_date_idx on expenses (group_id, date d
 create index if not exists expense_splits_expense_idx on expense_splits (expense_id);
 create index if not exists group_members_user_idx on group_members (user_id);
 
+alter table profiles alter column avatar_color set default '#c9a96a';
+
 -- ── New tables ───────────────────────────────────────────────
 
 create table if not exists budgets (

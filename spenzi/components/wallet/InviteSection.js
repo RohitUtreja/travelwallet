@@ -6,7 +6,7 @@ import { Button, IconButton } from '../ui/Button'
 import { Select } from '../ui/Select'
 import { useToast } from '../ui/Toast'
 
-const ROLES = [{ id: 'member', label: 'Can add expenses' }, { id: 'viewer', label: 'View only' }]
+const ROLES = [{ id: 'member', label: 'Member' }, { id: 'viewer', label: 'View only' }]
 const linkFor = (t) => `${window.location.origin}/join/${t}`
 
 export default function InviteSection({ group }) {
@@ -51,8 +51,8 @@ export default function InviteSection({ group }) {
       <div className="card flex flex-col gap-4">
         <p className="text-sm text-muted">Anyone with an account can join through a link. Links expire after 7 days.</p>
         <div className="flex items-end gap-3">
-          <Select label="Access" items={ROLES} selectedKey={role} onSelectionChange={setRole} className="flex-1" compact />
-          <Button isPending={pending} onPress={create} size="sm" className="h-10"><Link2 aria-hidden size={15} /> Create link</Button>
+          <Select label="Access" items={ROLES} selectedKey={role} onSelectionChange={setRole} className="min-w-0 flex-1" compact />
+          <Button isPending={pending} onPress={create} size="sm" className="h-10 shrink-0 whitespace-nowrap px-3.5"><Link2 aria-hidden size={15} /> Create link</Button>
         </div>
         {invites.length > 0 && (
           <ul className="flex flex-col gap-2 border-t border-line pt-4">
