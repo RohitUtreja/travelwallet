@@ -1,51 +1,36 @@
 import './globals.css'
+import Providers from './providers'
 
 export const metadata = {
   title: 'FamilyWallet',
-  description: 'Split costs with friends or track your family spending',
+  description: 'Shared household spending, beautifully simple',
   manifest: '/manifest.json',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'FamilyWallet',
-  },
-  icons: {
-    apple: '/icon-192.png',
-  },
+  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'FamilyWallet' },
+  icons: { icon: '/icon-192.png', apple: '/icon-192.png' },
 }
 
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  maximumScale: 1,
-  themeColor: '#0c0c0c',
+  themeColor: '#12100e',
 }
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <script
           dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').catch(function(err) {
-                    console.warn('SW registration failed:', err);
-                  });
-                });
-              }
-            `,
+            __html: `if ('serviceWorker' in navigator) { window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function (e) { console.warn('SW registration failed:', e) }) }) }`,
           }}
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   )
 }

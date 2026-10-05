@@ -1,56 +1,40 @@
-// ─── Currency formatting ─────────────────────────────────────────────────────
+// ─── Currency ────────────────────────────────────────────────────────────────
 
-export function formatCurrency(amount, currencyCode) {
+export function formatCurrency(amount, currencyCode, { compact = false } = {}) {
+  const n = Number(amount) || 0
   try {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat(undefined, {
       style: 'currency',
       currency: currencyCode,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount)
+      notation: compact ? 'compact' : 'standard',
+      minimumFractionDigits: compact ? 0 : 2,
+      maximumFractionDigits: compact ? 1 : 2,
+    }).format(n)
   } catch {
-    return `${currencyCode} ${Number(amount).toFixed(2)}`
+    return `${currencyCode} ${n.toFixed(2)}`
   }
 }
 
-export function parseAmount(str) {
-  // Handle both comma and dot as decimal separator
-  const cleaned = String(str).replace(/[^\d.,]/g, '').replace(',', '.')
-  const val = parseFloat(cleaned)
-  return isNaN(val) ? 0 : Math.round(val * 100) / 100
-}
-
-// ─── Category definitions ────────────────────────────────────────────────────
-
-export const CATEGORIES = {
-  // Home / personal
-  rent:          { emoji: '🏠', label: 'Rent',        color: '#A78BFA' },
-  groceries:     { emoji: '🛒', label: 'Groceries',   color: '#34D399' },
-  eatingout:     { emoji: '🍴', label: 'Eating Out',  color: '#FF6B6B' },
-  utilities:     { emoji: '⚡', label: 'Utilities',   color: '#FBBF24' },
-  fitness:       { emoji: '💪', label: 'Fitness',     color: '#10b981' },
-  insurance:     { emoji: '🛡️', label: 'Insurance',   color: '#60A5FA' },
-  investment:    { emoji: '📈', label: 'Investment',  color: '#ccff00' },
-  entertainment: { emoji: '🎬', label: 'Entertain',   color: '#F472B6' },
-  // Travel / group
-  transport:     { emoji: '🚌', label: 'Transport',   color: '#4A90E2' },
-  car:           { emoji: '🚗', label: 'Car',         color: '#7B68EE' },
-  taxi:          { emoji: '🚕', label: 'Taxi',        color: '#F5A623' },
-  hotel:         { emoji: '🏨', label: 'Hotel',       color: '#50E3C2' },
-  flights:       { emoji: '✈️', label: 'Flights',     color: '#00D4AA' },
-  activities:    { emoji: '🎡', label: 'Activities',  color: '#FF9F43' },
-  shopping:      { emoji: '🛍️', label: 'Shopping',    color: '#EE5A24' },
-  fuel:          { emoji: '⛽', label: 'Fuel',        color: '#C0392B' },
-  medical:       { emoji: '💊', label: 'Medical',     color: '#A29BFE' },
-  other:         { emoji: '💰', label: 'Other',       color: '#5a7090' },
-}
-
-export function getCategoryEmoji(category) {
-  return CATEGORIES[category]?.emoji ?? '💰'
-}
-
-export function getCategoryColor(category) {
-  return CATEGORIES[category]?.color ?? '#5a7090'
+/**
+ * Parse a user-typed amount. Handles "1,234.50", "1.234,50", "35,24" (decimal comma)
+ * and "1,234" (thousands). Returns 0 for unparseable input.
+ */
+export function parseAmount(input) {
+  let s = String(input ?? '').replace(/[^\d.,]/g, '')
+  if (!s) return 0
+  const lastComma = s.lastIndexOf(',')
+  const lastDot = s.lastIndexOf('.')
+  if (lastComma !== -1 && lastDot !== -1) {
+    // whichever comes last is the decimal separator
+    s = lastComma > lastDot ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '')
+  } else if (lastComma !== -1) {
+    const parts = s.split(',')
+    s = parts.length === 2 && parts[1].length <= 2 ? s.replace(',', '.') : s.replace(/,/g, '')
+  } else if ((s.match(/\./g) ?? []).length > 1) {
+    s = s.replace(/\./g, '') // "1.234.567" => thousands dots
+  }
+  const val = parseFloat(s)
+  return Number.isFinite(val) ? Math.round(val * 100) / 100 : 0
 }
 
 // ─── Debt simplification (minimize cash flow) ────────────────────────────────
@@ -137,27 +121,55 @@ export function computeBalances(expenses, splits, settlements, members) {
   return Object.values(balanceMap)
 }
 
-// ─── Date helpers ─────────────────────────────────────────────────────────────
+// ─── Dates (local time — never UTC, or late-night entries land on the wrong day) ──
+
+const pad = (n) => String(n).padStart(2, '0')
+
+export function toISODate(d) {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+export function todayISO() {
+  return toISODate(new Date())
+}
+
+export function monthRange(year, month) {
+  const last = new Date(year, month + 1, 0).getDate()
+  return { from: `${year}-${pad(month + 1)}-01`, to: `${year}-${pad(month + 1)}-${pad(last)}` }
+}
+
+export function shiftMonth({ year, month }, delta) {
+  const n = year * 12 + month + delta
+  return { year: Math.floor(n / 12), month: ((n % 12) + 12) % 12 }
+}
 
 export function formatDate(dateStr) {
   if (!dateStr) return ''
   const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-export function todayISO() {
-  return new Date().toISOString().split('T')[0]
+export function formatMonth(year, month, style = 'long') {
+  return new Date(year, month, 1).toLocaleDateString(undefined, { month: style, year: 'numeric' })
 }
 
-// ─── Misc ─────────────────────────────────────────────────────────────────────
+// ─── People ──────────────────────────────────────────────────────────────────
 
 export function getInitial(name) {
-  return name ? name.charAt(0).toUpperCase() : '?'
+  return name ? name.trim().charAt(0).toUpperCase() : '?'
 }
 
+export const AVATAR_COLORS = ['#c9a96a', '#86bf9f', '#9bb5d6', '#e58b7f', '#b9a3d9', '#d9b38c', '#8fc9c4', '#d6a0b5']
+
 export function avatarBg(name) {
-  const colors = ['#00D4AA', '#4A90E2', '#FF6B6B', '#FFB547', '#A29BFE', '#50E3C2', '#FF9F43']
   let hash = 0
   for (let i = 0; i < (name?.length ?? 0); i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
-  return colors[Math.abs(hash) % colors.length]
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]
+}
+
+// ─── Navigation ──────────────────────────────────────────────────────────────
+
+/** Only same-site relative paths — blocks open redirects like //evil.com or /\\evil.com. */
+export function safeNext(next) {
+  return typeof next === 'string' && next.startsWith('/') && !next.startsWith('//') && !next.includes('\\') ? next : '/groups'
 }

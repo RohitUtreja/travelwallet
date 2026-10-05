@@ -1,201 +1,84 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter, useParams, useSearchParams } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { ArrowRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
-import { formatCurrency, getInitial, avatarBg } from '@/lib/utils'
-import Toast, { useToast } from '@/components/Toast'
+import { formatCurrency } from '@/lib/utils'
+import { useSession } from '@/lib/useSession'
+import PageHeader from '@/components/PageHeader'
+import { Avatar } from '@/components/ui/Avatar'
+import { Button, Spinner } from '@/components/ui/Button'
+import { useToast } from '@/components/ui/Toast'
+import { notifyExpensesChanged } from '@/components/ExpenseForm'
 
-export default function SettlePage() {
+function Settle() {
   const router = useRouter()
   const { id: groupId } = useParams()
-  const searchParams = useSearchParams()
-  const { toasts, showToast } = useToast()
+  const params = useSearchParams()
+  const { user } = useSession()
+  const { show } = useToast()
+  const from = params.get('from')
+  const to = params.get('to')
+  const amount = Math.round(parseFloat(params.get('amount') ?? '0') * 100) / 100
 
-  const fromUserId = searchParams.get('from')
-  const toUserId = searchParams.get('to')
-  const amountParam = parseFloat(searchParams.get('amount') ?? '0')
-
-  const [currentUser, setCurrentUser] = useState(null)
-  const [group, setGroup] = useState(null)
-  const [fromProfile, setFromProfile] = useState(null)
-  const [toProfile, setToProfile] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [initing, setIniting] = useState(true)
-
-  const init = useCallback(async () => {
-    const supabase = createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) { router.replace('/login'); return }
-    setCurrentUser(session.user)
-
-    const [
-      { data: groupData },
-      { data: fromProf },
-      { data: toProf },
-    ] = await Promise.all([
-      supabase.from('groups').select('*').eq('id', groupId).single(),
-      supabase.from('profiles').select('id, name, avatar_color').eq('id', fromUserId).single(),
-      supabase.from('profiles').select('id, name, avatar_color').eq('id', toUserId).single(),
-    ])
-
-    if (!groupData) { router.replace('/groups'); return }
-    setGroup(groupData)
-    setFromProfile(fromProf)
-    setToProfile(toProf)
-    setIniting(false)
-  }, [groupId, fromUserId, toUserId, router])
+  const [ctx, setCtx] = useState(null)
+  const [pending, setPending] = useState(false)
 
   useEffect(() => {
-    init()
-  }, [init])
-
-  async function handleSettle() {
-    if (!amountParam || amountParam <= 0) {
-      showToast('Invalid settlement amount', 'error')
-      return
-    }
-    setLoading(true)
-
+    if (!user) return
     const supabase = createClient()
-    const { error } = await supabase.from('settlements').insert({
-      group_id: groupId,
-      from_user: fromUserId,
-      to_user: toUserId,
-      amount: amountParam,
+    Promise.all([
+      supabase.from('groups').select('currency').eq('id', groupId).maybeSingle(),
+      supabase.from('profiles').select('id, name, avatar_color').in('id', [from, to].filter(Boolean)),
+    ]).then(([g, p]) => {
+      if (!g.data || !(amount > 0) || !from || !to || from === to) return router.replace(`/groups/${groupId}`)
+      setCtx({ currency: g.data.currency, people: Object.fromEntries((p.data ?? []).map((x) => [x.id, x])) })
     })
+  }, [user, groupId, from, to, amount, router])
 
-    if (error) {
-      showToast(error.message, 'error')
-      setLoading(false)
-      return
-    }
-
-    showToast('Settlement recorded!', 'success')
-    setTimeout(() => router.push(`/groups/${groupId}`), 800)
+  async function confirm() {
+    setPending(true)
+    const { error } = await createClient().from('settlements').insert({ group_id: groupId, from_user: from, to_user: to, amount })
+    if (error) { show(error.message, { type: 'error' }); setPending(false); return }
+    notifyExpensesChanged()
+    show('Settlement recorded', { type: 'success' })
+    router.replace(`/groups/${groupId}`)
   }
 
-  const isMyDebt = currentUser?.id === fromUserId
-  const isMyCredit = currentUser?.id === toUserId
-
-  if (initing) {
-    return (
-      <div className="min-h-dvh flex items-center justify-center" style={{ background: '#0c0c0c' }}>
-        <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(204,255,0,0.3)', borderTopColor: '#ccff00' }} />
-      </div>
-    )
-  }
+  if (!ctx) return <div className="flex min-h-[60dvh] items-center justify-center text-gold"><Spinner className="h-7 w-7" /></div>
+  const a = ctx.people[from]
+  const b = ctx.people[to]
+  const you = (id, name) => (id === user.id ? 'You' : name)
 
   return (
-    <div className="page-container">
-      <Toast toasts={toasts} />
-
-      {/* Header */}
-      <header className="flex items-center gap-3 px-5 pt-6 pb-4 safe-area-top border-b sticky top-0 z-30" style={{ background: '#0c0c0c', borderColor: 'rgba(255,255,255,0.08)' }}>
-        <button
-          onClick={() => router.back()}
-          className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0 min-h-[44px]"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ebebeb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-        </button>
-        <h1 className="mono text-xs tracking-[0.15em] uppercase" style={{ color: '#ebebeb' }}>SETTLE UP</h1>
-      </header>
-
-      <main className="flex-1 flex flex-col items-center justify-center px-5 py-10">
-        <div className="w-full max-w-sm flex flex-col items-center gap-8 animate-fade-in">
-
-          {/* Center glass card */}
-          <div className="card w-full flex flex-col items-center gap-6 py-8">
-            <p className="mono text-[10px] text-center" style={{ color: 'rgba(235,235,235,0.4)', letterSpacing: '0.1em' }}>
-              RECORDING SETTLEMENT
-            </p>
-
-            {/* Avatar row */}
-            <div className="flex items-center gap-3 w-full justify-center">
-              {/* From */}
-              <div className="flex flex-col items-center gap-2">
-                <div
-                  className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold"
-                  style={{
-                    backgroundColor: fromProfile?.avatar_color ?? avatarBg(fromProfile?.name ?? ''),
-                    border: isMyDebt ? '2px solid #ff4d4d' : '2px solid transparent',
-                    color: '#000',
-                  }}
-                >
-                  {getInitial(fromProfile?.name ?? '?')}
-                </div>
-                <p className="text-xs font-semibold" style={{ fontFamily: "'Space Grotesk', sans-serif", color: isMyDebt ? '#ff4d4d' : '#ebebeb' }}>
-                  {isMyDebt ? 'You' : fromProfile?.name}
-                </p>
-              </div>
-
-              {/* Amount + arrow */}
-              <div className="flex flex-col items-center gap-1 flex-1">
-                <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: '1.75rem', color: '#ccff00', letterSpacing: '-0.04em' }}>
-                  {formatCurrency(amountParam, group?.currency ?? 'EUR')}
-                </p>
-                <div className="flex items-center gap-1 w-full justify-center">
-                  <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.08)' }} />
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccff00" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-                  </svg>
-                  <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.08)' }} />
-                </div>
-                <p className="mono text-[10px]" style={{ color: 'rgba(235,235,235,0.3)' }}>pays</p>
-              </div>
-
-              {/* To */}
-              <div className="flex flex-col items-center gap-2">
-                <div
-                  className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold"
-                  style={{
-                    backgroundColor: toProfile?.avatar_color ?? avatarBg(toProfile?.name ?? ''),
-                    border: isMyCredit ? '2px solid #ccff00' : '2px solid transparent',
-                    color: '#000',
-                  }}
-                >
-                  {getInitial(toProfile?.name ?? '?')}
-                </div>
-                <p className="text-xs font-semibold" style={{ fontFamily: "'Space Grotesk', sans-serif", color: isMyCredit ? '#ccff00' : '#ebebeb' }}>
-                  {isMyCredit ? 'You' : toProfile?.name}
-                </p>
-              </div>
-            </div>
-
-            {/* Context note */}
-            <div className="w-full rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <p className="mono text-[10px]" style={{ color: 'rgba(235,235,235,0.4)', lineHeight: 1.6 }}>
-                {isMyDebt
-                  ? `You are confirming that you have paid ${toProfile?.name} ${formatCurrency(amountParam, group?.currency ?? 'EUR')}.`
-                  : isMyCredit
-                  ? `You are confirming that ${fromProfile?.name} has paid you ${formatCurrency(amountParam, group?.currency ?? 'EUR')}.`
-                  : `Recording that ${fromProfile?.name} paid ${toProfile?.name} ${formatCurrency(amountParam, group?.currency ?? 'EUR')}.`}
-              </p>
-            </div>
+    <div className="flex flex-1 flex-col items-center gap-8 px-6 py-10">
+      <div className="card flex w-full flex-col items-center gap-7 p-8">
+        <p className="eyebrow">Record a payment</p>
+        <div className="flex w-full items-center justify-between">
+          <div className="flex flex-col items-center gap-2"><Avatar name={a?.name} color={a?.avatar_color} size={64} /><span className="text-sm">{you(from, a?.name)}</span></div>
+          <div className="flex flex-col items-center gap-1">
+            <span className="display num text-4xl font-semibold text-gold-soft">{formatCurrency(amount, ctx.currency)}</span>
+            <ArrowRight aria-hidden className="text-gold" />
           </div>
-
-          <div className="w-full flex flex-col gap-3">
-            <button
-              onClick={handleSettle}
-              disabled={loading}
-              className="btn-primary flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-              ) : (
-                'Confirm Settlement'
-              )}
-            </button>
-            <button
-              onClick={() => router.back()}
-              className="btn-ghost"
-            >
-              Cancel
-            </button>
-          </div>
+          <div className="flex flex-col items-center gap-2"><Avatar name={b?.name} color={b?.avatar_color} size={64} /><span className="text-sm">{you(to, b?.name)}</span></div>
         </div>
-      </main>
+        <p className="text-center text-sm leading-relaxed text-muted">
+          Confirm that {you(from, a?.name)} {from === user.id ? 'have' : 'has'} paid {you(to, b?.name)}. Balances update for everyone.
+        </p>
+      </div>
+      <div className="flex w-full flex-col gap-3">
+        <Button size="lg" isPending={pending} onPress={confirm}>Confirm payment</Button>
+        <Button size="lg" variant="ghost" onPress={() => router.back()}>Cancel</Button>
+      </div>
+    </div>
+  )
+}
+
+export default function SettlePage() {
+  return (
+    <div className="page">
+      <PageHeader back title="Settle up" />
+      <Suspense fallback={null}><Settle /></Suspense>
     </div>
   )
 }

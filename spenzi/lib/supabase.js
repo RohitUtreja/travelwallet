@@ -2,6 +2,7 @@ import { createBrowserClient } from '@supabase/ssr'
 
 let client = null
 
+/** One shared browser client — creating several duplicates auth listeners and sockets. */
 export function getSupabaseClient() {
   if (!client) {
     client = createBrowserClient(
@@ -12,12 +13,4 @@ export function getSupabaseClient() {
   return client
 }
 
-// Convenience alias
-export const supabase = typeof window !== 'undefined' ? getSupabaseClient() : null
-
-export function createClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  )
-}
+export const createClient = getSupabaseClient

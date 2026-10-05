@@ -1,229 +1,97 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Form, RadioGroup, Radio, Label, CheckboxGroup, Checkbox, SearchField, Input } from 'react-aria-components'
+import { House, Users, Check, Search } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
-import Toast, { useToast } from '@/components/Toast'
+import { CURRENCIES } from '@/lib/currencies'
+import { useSession } from '@/lib/useSession'
+import PageHeader from '@/components/PageHeader'
+import { Avatar } from '@/components/ui/Avatar'
+import { Button } from '@/components/ui/Button'
+import { TextField } from '@/components/ui/TextField'
+import { Select } from '@/components/ui/Select'
+import { useToast } from '@/components/ui/Toast'
 
-const CURRENCIES = [
-  'EUR', 'USD', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'SGD', 'AED', 'TRY', 'INR',
+const TYPES = [
+  { id: 'family', title: 'Family', desc: 'Everyone logs household spending. No splitting.', Icon: House },
+  { id: 'split', title: 'Split', desc: 'Share costs and settle up — trips, flatmates.', Icon: Users },
 ]
 
-export default function NewGroupPage() {
+export default function NewWalletPage() {
   const router = useRouter()
-  const { toasts, showToast } = useToast()
-  const [currentUser, setCurrentUser] = useState(null)
-  const [allProfiles, setAllProfiles] = useState([])
-  const [name, setName] = useState('')
-  const [currency, setCurrency] = useState('EUR')
-  const [type, setType] = useState('split')
-  const [selectedMembers, setSelectedMembers] = useState([])
-  const [search, setSearch] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  const init = useCallback(async () => {
-    const supabase = createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) { router.replace('/login'); return }
-    setCurrentUser(session.user)
-
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id, name, avatar_color')
-      .order('name')
-
-    setAllProfiles(profiles ?? [])
-    setSelectedMembers([session.user.id])
-  }, [router])
+  const { user } = useSession()
+  const { show } = useToast()
+  const [profiles, setProfiles] = useState([])
+  const [type, setType] = useState('family')
+  const [currency, setCurrency] = useState('INR')
+  const [selected, setSelected] = useState([])
+  const [query, setQuery] = useState('')
+  const [pending, setPending] = useState(false)
 
   useEffect(() => {
-    init()
-  }, [init])
+    if (!user) return
+    createClient().from('profiles').select('id, name, avatar_color').neq('id', user.id).order('name')
+      .then(({ data }) => setProfiles(data ?? []))
+  }, [user])
 
-  function toggleMember(userId) {
-    if (userId === currentUser?.id) return
-    setSelectedMembers((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
-    )
-  }
+  const visible = useMemo(() => profiles.filter((p) => p.name.toLowerCase().includes(query.toLowerCase())), [profiles, query])
 
-  const filteredProfiles = allProfiles.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  )
-
-  async function handleCreate(e) {
+  async function onSubmit(e) {
     e.preventDefault()
-    if (!name.trim() || selectedMembers.length === 0) return
-    setLoading(true)
-
-    const supabase = createClient()
-
-    const { data: group, error: groupError } = await supabase
-      .from('groups')
-      .insert({ name: name.trim(), currency, type, created_by: currentUser.id })
-      .select()
-      .single()
-
-    if (groupError) {
-      showToast(groupError.message, 'error')
-      setLoading(false)
-      return
-    }
-
-    const memberSet = Array.from(new Set([currentUser.id, ...selectedMembers]))
-    const { error: membersError } = await supabase.from('group_members').insert(
-      memberSet.map((userId) => ({ group_id: group.id, user_id: userId }))
-    )
-
-    if (membersError) {
-      showToast(membersError.message, 'error')
-      setLoading(false)
-      return
-    }
-
-    router.push(`/groups/${group.id}`)
+    const name = String(new FormData(e.currentTarget).get('name')).trim()
+    setPending(true)
+    const { data, error } = await createClient().rpc('create_group', { p_name: name, p_currency: currency, p_type: type, p_members: selected })
+    if (error) { show(error.message, { type: 'error' }); setPending(false); return }
+    router.replace(`/groups/${data}`)
   }
 
   return (
-    <div className="page-container">
-      <Toast toasts={toasts} />
-
-      {/* Header */}
-      <header className="flex items-center gap-3 px-5 pt-6 pb-4 safe-area-top border-b sticky top-0 z-30" style={{ background: '#0c0c0c', borderColor: 'rgba(255,255,255,0.08)' }}>
-        <button
-          onClick={() => router.back()}
-          className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0 min-h-[44px]"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ebebeb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-        </button>
-        <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '17px', color: '#ebebeb', letterSpacing: '-0.02em' }}>New Group</h1>
-      </header>
-
-      <form onSubmit={handleCreate} className="flex-1 flex flex-col overflow-y-auto">
-        <div className="flex flex-col gap-6 px-5 py-6">
-          {/* Group type */}
-          <div className="flex flex-col">
-            <label className="section-label">// Type</label>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { key: 'split', icon: '🤝', title: 'Split', desc: 'Share costs & settle up' },
-                { key: 'family', icon: '🏡', title: 'Family', desc: 'Track shared household spend' },
-              ].map((t) => (
-                <button
-                  key={t.key}
-                  type="button"
-                  onClick={() => setType(t.key)}
-                  className="card flex flex-col items-start gap-1 text-left min-h-[88px] transition-all active:scale-[0.98]"
-                  style={type === t.key ? { border: '1px solid rgba(204,255,0,0.5)', background: 'rgba(204,255,0,0.06)' } : {}}
-                >
-                  <span className="text-2xl">{t.icon}</span>
-                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, color: type === t.key ? '#ccff00' : '#ebebeb' }}>{t.title}</span>
-                  <span className="mono text-[10px]" style={{ color: 'rgba(235,235,235,0.4)' }}>{t.desc}</span>
-                </button>
+    <div className="page">
+      <PageHeader back="/groups" title="New wallet" />
+      <Form onSubmit={onSubmit} className="flex flex-1 flex-col">
+        <div className="flex flex-col gap-7 px-5 py-6">
+          <RadioGroup value={type} onChange={setType} className="flex flex-col gap-2">
+            <Label className="eyebrow">Type</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {TYPES.map(({ id, title, desc, Icon }) => (
+                <Radio key={id} value={id} className="card flex cursor-pointer flex-col gap-2 p-4 outline-none transition data-[selected]:border-gold data-[selected]:bg-gold/10 data-[focus-visible]:ring-2 data-[focus-visible]:ring-gold-soft">
+                  <Icon aria-hidden size={22} strokeWidth={1.5} className="text-gold-soft" />
+                  <span className="display text-xl font-semibold">{title}</span>
+                  <span className="text-xs leading-snug text-muted">{desc}</span>
+                </Radio>
               ))}
             </div>
-          </div>
+          </RadioGroup>
 
-          {/* Group name */}
-          <div className="flex flex-col">
-            <label className="section-label">// Group Name</label>
-            <input
-              type="text"
-              className="input-field"
-              placeholder={type === 'family' ? 'e.g. Utreja Household' : 'e.g. Bali 2025'}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              maxLength={60}
-            />
-          </div>
+          <TextField label="Name" name="name" isRequired maxLength={60} placeholder={type === 'family' ? 'e.g. Utreja Household' : 'e.g. Goa Trip'} />
+          <Select label="Currency" items={CURRENCIES} selectedKey={currency} onSelectionChange={setCurrency} />
 
-          {/* Currency */}
-          <div className="flex flex-col">
-            <label className="section-label">// Currency</label>
-            <div className="flex gap-2 overflow-x-auto pb-1 -mx-5 px-5">
-              {CURRENCIES.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setCurrency(c)}
-                  className="px-4 py-2 rounded-full text-xs font-bold border transition-all flex-shrink-0 min-h-[44px] mono"
-                  style={currency === c
-                    ? { background: '#ccff00', color: '#000', border: '1px solid #ccff00' }
-                    : { background: 'rgba(255,255,255,0.03)', color: 'rgba(235,235,235,0.4)', border: '1px solid rgba(255,255,255,0.1)' }
-                  }
-                >
-                  {c}
-                </button>
+          <CheckboxGroup value={selected} onChange={setSelected} className="flex flex-col gap-3">
+            <Label className="eyebrow">Add members · {selected.length} selected</Label>
+            <SearchField value={query} onChange={setQuery} aria-label="Search people" className="relative">
+              <Search aria-hidden size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-faint" />
+              <Input placeholder="Search people" className="h-11 w-full rounded-2xl border border-line bg-white/[0.04] pl-10 pr-4 text-sm text-ivory outline-none placeholder:text-faint data-[focused]:border-gold/70" />
+            </SearchField>
+            <div className="flex flex-col gap-2">
+              {visible.length === 0 && <p className="py-4 text-center text-sm text-faint">No one to add yet. You can invite people by link after creating.</p>}
+              {visible.map((p) => (
+                <Checkbox key={p.id} value={p.id} className="card group flex min-h-14 cursor-pointer items-center gap-3 p-3 outline-none data-[selected]:border-gold/50 data-[selected]:bg-gold/5 data-[focus-visible]:ring-2 data-[focus-visible]:ring-gold-soft">
+                  <Avatar name={p.name} color={p.avatar_color} />
+                  <span className="flex-1 text-[15px]">{p.name}</span>
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full border border-line text-ink transition group-data-[selected]:border-gold group-data-[selected]:bg-gold">
+                    <Check aria-hidden size={14} className="opacity-0 group-data-[selected]:opacity-100" />
+                  </span>
+                </Checkbox>
               ))}
             </div>
-          </div>
-
-          {/* Members */}
-          <div className="flex flex-col">
-            <label className="section-label">// Members ({selectedMembers.length} selected)</label>
-            <input
-              type="text"
-              className="input-field mb-3"
-              placeholder="Search people..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <div className="flex flex-col gap-2 max-h-64 overflow-y-auto">
-              {filteredProfiles.length === 0 && (
-                <p className="text-sm text-center py-4" style={{ color: 'rgba(235,235,235,0.3)' }}>No profiles found</p>
-              )}
-              {filteredProfiles.map((profile) => {
-                const isSelected = selectedMembers.includes(profile.id)
-                const isMe = profile.id === currentUser?.id
-                return (
-                  <button
-                    key={profile.id}
-                    type="button"
-                    onClick={() => toggleMember(profile.id)}
-                    className="card flex items-center gap-3 min-h-[56px] transition-all active:scale-[0.98] text-left"
-                    style={isSelected
-                      ? { border: '1px solid rgba(204,255,0,0.3)', background: 'rgba(204,255,0,0.04)' }
-                      : {}
-                    }
-                  >
-                    <div
-                      className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-                      style={{ background: isSelected ? '#ccff00' : (profile.avatar_color ?? 'rgba(255,255,255,0.1)'), color: isSelected ? '#000' : '#ebebeb' }}
-                    >
-                      {profile.name.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="text-sm font-medium flex-1" style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#ebebeb' }}>
-                      {profile.name} {isMe ? '(you)' : ''}
-                    </span>
-                    {isSelected && (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccff00" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12"/>
-                      </svg>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
+          </CheckboxGroup>
         </div>
 
-        {/* Submit */}
-        <div className="px-5 pb-8 mt-auto sticky bottom-0 border-t pt-4" style={{ background: '#0c0c0c', borderColor: 'rgba(255,255,255,0.08)' }}>
-          <button
-            type="submit"
-            disabled={loading || !name.trim() || selectedMembers.length < 1}
-            className="btn-primary flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-            ) : (
-              'Create Group'
-            )}
-          </button>
+        <div className="safe-bottom sticky bottom-0 mt-auto border-t border-line bg-shell/90 px-5 pt-4 backdrop-blur-xl">
+          <Button type="submit" size="lg" isPending={pending}>Create wallet</Button>
         </div>
-      </form>
+      </Form>
     </div>
   )
 }

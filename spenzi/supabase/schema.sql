@@ -1,6 +1,7 @@
 -- ============================================================
 -- FamilyWallet – Supabase Database Schema
--- Run this in the Supabase SQL editor for your project
+-- Run this in the Supabase SQL editor for your project, then run
+-- migrations/003_wallet_platform.sql (roles, invites, budgets, recurring, RPCs, RLS rewrite).
 -- ============================================================
 
 -- ── profiles (extends auth.users) ───────────────────────────
