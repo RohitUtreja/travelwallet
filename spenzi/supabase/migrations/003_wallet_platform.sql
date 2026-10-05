@@ -493,3 +493,17 @@ grant execute on function
   public.wallet_overview(),
   public.group_spend_summary(uuid, date, date)
 to authenticated;
+
+-- ── API privileges ───────────────────────────────────────────
+-- Newer Supabase projects don't auto-expose tables created in the SQL editor, which
+-- shows up as "permission denied for table …". Row-level security (above) still decides
+-- which rows each signed-in user can touch; these grants only let the role reach the tables.
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on all tables in schema public to authenticated;
+grant usage, select on all sequences in schema public to authenticated;
+grant execute on all functions in schema public to authenticated;
+alter default privileges in schema public grant select, insert, update, delete on tables to authenticated;
+alter default privileges in schema public grant usage, select on sequences to authenticated;
+alter default privileges in schema public grant execute on functions to authenticated;
+
+notify pgrst, 'reload schema';
