@@ -1,31 +1,15 @@
 /**
- * The real height the app can draw into, in CSS px — the single source of truth for layout
- * (published as the --app-h CSS variable and used by the scroll area, bottom bar, toasts, sheets).
+ * The height the app can draw into, in CSS px — the single source of truth for layout, published as
+ * the --app-h CSS variable (scroll area, bottom bar, toasts, sheets all derive from it).
  *
- *  - Safari / any browser: window.innerHeight. That is the area above the browser's own toolbar,
- *    so the bottom bar sits right on the toolbar with no gap.
- *  - Installed iOS app (navigator.standalone): iOS reports a viewport shorter than the screen by about
- *    the status-bar inset (e.g. 812 of 874), which left a gap under the bottom bar. There the real
- *    window is the screen, so use the screen's portrait/landscape height instead.
+ * This is window.innerHeight: the area above a browser's own toolbar in Safari, and the area iOS
+ * will actually paint in an installed app. NOTE: an earlier version "corrected" the installed iOS
+ * app to screen.height (874 vs the reported 812), but iOS does not paint below the reported
+ * viewport — the bottom bar was clipped — so that correction was removed.
  *
  * SELF-CONTAINED ON PURPOSE: it is also inlined into <head> via Function#toString so the value is
- * set before first paint. Do not reference anything outside this function. `env` is for tests.
+ * set before first paint. Do not reference anything outside this function.
  */
 export function appHeight(env) {
-  var e = env || {
-    innerHeight: window.innerHeight,
-    innerWidth: window.innerWidth,
-    screenWidth: screen.width,
-    screenHeight: screen.height,
-    iosStandalone: window.navigator.standalone === true,
-  }
-  var h = e.innerHeight
-  if (!e.iosStandalone) return h
-  // iOS reports screen dimensions in portrait orientation regardless of rotation
-  var long = Math.max(e.screenWidth, e.screenHeight)
-  var short = Math.min(e.screenWidth, e.screenHeight)
-  var full = e.innerHeight >= e.innerWidth ? long : short
-  var missing = full - h
-  // only correct the known "viewport shorter than screen by the inset" case, never a big difference
-  return missing > 0 && missing <= 100 ? full : h
+  return (env || window).innerHeight
 }
