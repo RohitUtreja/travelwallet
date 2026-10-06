@@ -11,8 +11,9 @@ Tailwind · Supabase (Auth + Postgres + RLS).
 1. Create a Supabase project and put its URL/anon key in `.env.local`:
    ```
    NEXT_PUBLIC_SUPABASE_URL=...
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...   # the "publishable" (formerly "anon") key
    ```
+   `NEXT_PUBLIC_SUPABASE_ANON_KEY` is accepted as an alias. Never use the secret/`service_role` key.
 2. In the SQL editor run, in order:
    * **Fresh project:** `supabase/schema.sql`, then `supabase/migrations/003_wallet_platform.sql`
    * **Existing project:** `002_family_groups.sql` (if not yet applied), then `003_wallet_platform.sql`
@@ -26,7 +27,7 @@ Tailwind · Supabase (Auth + Postgres + RLS).
 ## Deploy on Vercel
 
 1. Import the repo and set **Root Directory** to `spenzi` (the app lives in a subfolder).
-2. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` under *Environment Variables*
+2. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or `…_ANON_KEY`) under *Environment Variables*
    **before the first build** — Next inlines `NEXT_PUBLIC_*` values at build time, so changing them
    later needs a redeploy.
 3. Deploy. The default Next.js build settings work; no `vercel.json` is needed. Vercel serves HTTPS,

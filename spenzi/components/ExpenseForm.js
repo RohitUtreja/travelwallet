@@ -6,7 +6,7 @@ import { ChevronDown, Check, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { getRecentCategories, pushRecentCategory, saveExpense } from '@/lib/api'
 import { nextAmount, displayAmount, toEditable } from '@/lib/amount'
-import { parseAmount, todayISO, formatCurrency } from '@/lib/utils'
+import { parseAmount, todayISO, formatCurrency, fitFontSize } from '@/lib/utils'
 import Keypad from './Keypad'
 import CategoryPicker from './CategoryPicker'
 import PageHeader from './PageHeader'
@@ -115,7 +115,7 @@ export default function ExpenseForm({ group, members, user, expense }) {
   return (
     <div className="flex h-dvh max-w-lg flex-col bg-shell mx-auto">
       <PageHeader back={back} title={editing ? 'Edit expense' : 'Add expense'} sticky={false}>
-        <span className="rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-xs font-medium text-gold-soft">{group.name}</span>
+        <span className="max-w-[38%] shrink-0 truncate rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-xs font-medium text-gold-soft">{group.name}</span>
       </PageHeader>
 
       <Form onSubmit={(e) => { e.preventDefault(); submit() }} className="flex min-h-0 flex-1 flex-col">
@@ -123,7 +123,11 @@ export default function ExpenseForm({ group, members, user, expense }) {
           {/* Amount */}
           <div className="py-7 text-center" role="group" aria-label="Amount">
             <p className="eyebrow mb-1">{group.currency}</p>
-            <p aria-live="polite" className={`display num text-[64px] font-semibold leading-none ${amount ? 'text-ivory' : 'text-faint'}`}>
+            <p
+              aria-live="polite"
+              className={`display num font-semibold leading-none ${amount ? 'text-ivory' : 'text-faint'}`}
+              style={{ fontSize: fitFontSize(displayAmount(amount), 64, 320) }}
+            >
               {displayAmount(amount)}
             </p>
             <div className="hairline mx-auto mt-4 w-28" />
