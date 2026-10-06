@@ -1,11 +1,26 @@
 'use client'
 import { useEffect, useState } from 'react'
 
-/** Visit any page with ?debug=1 to overlay the viewport numbers (for diagnosing device layout). */
+/**
+ * Overlays viewport numbers for diagnosing device layout. Enable with ?debug=1 in the URL, or (in an
+ * installed app) tap the "FamilyWallet" text at the bottom of Profile five times. Persisted in localStorage.
+ */
 export default function DebugViewport() {
   const [info, setInfo] = useState(null)
+  const [on, setOn] = useState(false)
+
   useEffect(() => {
-    if (!new URLSearchParams(window.location.search).has('debug')) return
+    const fromUrl = new URLSearchParams(window.location.search).has('debug')
+    if (fromUrl) { try { localStorage.setItem('fw:debug', '1') } catch { /* private mode */ } }
+    const read = () => { try { return fromUrl || localStorage.getItem('fw:debug') === '1' } catch { return fromUrl } }
+    setOn(read())
+    const sync = () => setOn(read())
+    window.addEventListener('fw:debug-toggle', sync)
+    return () => window.removeEventListener('fw:debug-toggle', sync)
+  }, [])
+
+  useEffect(() => {
+    if (!on) { setInfo(null); return }
     const probe = document.createElement('div')
     probe.style.cssText = 'position:fixed;left:0;top:0;width:0;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;visibility:hidden'
     document.body.appendChild(probe)
@@ -26,7 +41,7 @@ export default function DebugViewport() {
     }
     read(); addEventListener('resize', read)
     return () => { removeEventListener('resize', read); probe.remove() }
-  }, [])
+  }, [on])
   if (!info) return null
   return (
     <pre className="pointer-events-none fixed left-2 top-16 z-[200] rounded bg-black/80 p-2 text-[10px] leading-tight text-green-300">
