@@ -1,6 +1,6 @@
 'use client'
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useRef } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { RouterProvider } from 'react-aria-components'
 import { ToastProvider, useToast } from '@/components/ui/Toast'
 import LockGate from '@/components/LockGate'
@@ -26,6 +26,14 @@ function OfflineSync() {
   return null
 }
 
+/** Single scroll container for the whole app; scrolls back to the top on every route change. */
+function AppShell({ children }) {
+  const pathname = usePathname()
+  const ref = useRef(null)
+  useEffect(() => { ref.current?.scrollTo({ top: 0, left: 0 }) }, [pathname])
+  return <div ref={ref} id="app-scroll" className="app-scroll">{children}</div>
+}
+
 export default function Providers({ children }) {
   const router = useRouter()
   return (
@@ -33,7 +41,7 @@ export default function Providers({ children }) {
       <ToastProvider>
         <LockGate>
           <OfflineSync />
-          {children}
+          <AppShell>{children}</AppShell>
         </LockGate>
       </ToastProvider>
     </RouterProvider>
