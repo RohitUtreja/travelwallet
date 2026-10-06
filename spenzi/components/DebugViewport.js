@@ -43,7 +43,7 @@ export default function DebugViewport() {
         safeTop: cs.paddingTop, safeBottom: cs.paddingBottom,
         standalone: navigator.standalone === true || matchMedia('(display-mode: standalone)').matches,
         appH: getComputedStyle(document.documentElement).getPropertyValue('--app-h').trim(), units, navBottom: Math.round(document.querySelector('nav[aria-label=Main]')?.getBoundingClientRect().bottom ?? 0),
-        app: Math.round(document.getElementById('app-scroll')?.getBoundingClientRect().height ?? 0),
+        docH: document.documentElement.scrollHeight, docScrollable: document.documentElement.scrollHeight > innerHeight,
       })
     }
     read(); addEventListener('resize', read)

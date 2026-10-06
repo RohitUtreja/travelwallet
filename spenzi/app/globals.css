@@ -17,26 +17,19 @@
     text-rendering: optimizeLegibility;
     overflow-wrap: anywhere; /* user text (long words, URLs) must never widen the page */
   }
-  /* The window never scrolls (iOS can't pan or rubber-band it sideways); #app-scroll does.
-     Note: body is NOT position:fixed — on iOS standalone that shrank the viewport and left a
-     gap under the bottom bar. */
-  html, body { height: 100%; max-width: 100%; overflow: hidden; overscroll-behavior: none; }
+  /* The DOCUMENT scrolls normally. (An inner fixed scroller + overflow:hidden root makes iOS treat the
+     page as non-scrollable and report a viewport 62px shorter than the screen in the installed app —
+     confirmed on device with the viewport lab.) Sideways movement is prevented by clipping overflow
+     and allowing only vertical touch panning. */
+  html, body { max-width: 100%; overflow-x: clip; }
   body {
+    /* +1px keeps the document always scrollable, even on screens that fit exactly (e.g. Add expense),
+       so iOS never falls back to the short "non-scrollable page" viewport */
+    min-height: calc(100dvh + 1px);
+    touch-action: pan-y pinch-zoom;
     background:
       radial-gradient(120% 60% at 50% -10%, rgba(201,169,106,0.10), transparent 60%),
       #0b0a09;
-  }
-  .app-scroll {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: var(--app-h); /* the real visible height, measured in lib/appHeight.js */
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-y pinch-zoom; /* no sideways panning; opt back in with .pan-x */
   }
   ::-webkit-scrollbar { width: 0; height: 0; }
   :focus-visible { outline: 2px solid #e4cf9e; outline-offset: 2px; }
