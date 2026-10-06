@@ -5,6 +5,7 @@ import { Form, RadioGroup, Radio, Label } from 'react-aria-components'
 import { LogOut, Lock, Check } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { createPinStore } from '@/lib/pin'
+import { runViewportLab } from '@/lib/viewportLab'
 import { AVATAR_COLORS } from '@/lib/utils'
 import { useSession } from '@/lib/useSession'
 import BottomNav from '@/components/BottomNav'
@@ -67,8 +68,16 @@ export default function ProfilePage() {
   const [setup, setSetup] = useState(false)
   const [confirmOff, setConfirmOff] = useState(false)
   const taps = useRef({ n: 0, t: 0 })
+  const [debug, setDebug] = useState(false)
+  const [lab, setLab] = useState([])
+  const [labRunning, setLabRunning] = useState(false)
 
   useEffect(() => { setLockOn(store.isEnabled()) }, [store])
+  useEffect(() => {
+    const read = () => { try { setDebug(localStorage.getItem('fw:debug') === '1') } catch { /* private mode */ } }
+    read(); window.addEventListener('fw:debug-toggle', read)
+    return () => window.removeEventListener('fw:debug-toggle', read)
+  }, [])
   useEffect(() => {
     if (!user) return
     createClient().from('profiles').select('*').eq('id', user.id).single().then(({ data }) => {
@@ -135,6 +144,12 @@ export default function ProfilePage() {
         </section>
 
         <Button variant="danger" size="lg" onPress={signOut}><LogOut aria-hidden size={16} /> Sign out</Button>
+        {debug && (
+          <section className="card flex flex-col gap-3">
+            <Button variant="ghost" size="sm" isPending={labRunning} onPress={async () => { setLab([]); setLabRunning(true); await runViewportLab((l) => setLab((x) => [...x, l])); setLabRunning(false) }}>Run viewport lab</Button>
+            {lab.length > 0 && <pre className="overflow-x-auto whitespace-pre text-[10px] leading-snug text-green-300">{lab.join('\n')}</pre>}
+          </section>
+        )}
         <button type="button" onClick={footerTap} className="mx-auto text-center text-xs text-faint outline-none">FamilyWallet</button>
       </main>
 
