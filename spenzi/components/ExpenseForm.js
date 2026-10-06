@@ -113,7 +113,7 @@ export default function ExpenseForm({ group, members, user, expense }) {
   }
 
   return (
-    <div className="mx-auto flex max-w-lg flex-col bg-shell" style={{ height: 'var(--app-h)' }}>
+    <div className="mx-auto flex h-dvh max-w-lg flex-col bg-shell">
       <PageHeader back={back} title={editing ? 'Edit expense' : 'Add expense'} sticky={false}>
         <span className="max-w-[38%] shrink-0 truncate rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-xs font-medium text-gold-soft">{group.name}</span>
       </PageHeader>

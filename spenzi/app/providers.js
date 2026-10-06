@@ -5,7 +5,6 @@ import { RouterProvider } from 'react-aria-components'
 import { ToastProvider, useToast } from '@/components/ui/Toast'
 import LockGate from '@/components/LockGate'
 import DebugViewport from '@/components/DebugViewport'
-import ViewportSync from '@/components/ViewportSync'
 import { flushOfflineQueue } from '@/lib/api'
 
 function OfflineSync() {
@@ -35,7 +34,6 @@ export default function Providers({ children }) {
       <ToastProvider>
         <LockGate>
           <OfflineSync />
-          <ViewportSync />
           <DebugViewport />
           {children}
         </LockGate>

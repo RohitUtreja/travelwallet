@@ -30,7 +30,8 @@ export function ToastProvider({ children }) {
       <div
         role="status"
         aria-live="polite"
-        className="app-toast pointer-events-none fixed inset-x-0 z-[80] flex flex-col items-center gap-2 px-4"
+        className="pointer-events-none fixed inset-x-0 z-[80] flex flex-col items-center gap-2 px-4"
+        style={{ bottom: 'calc(6.5rem + env(safe-area-inset-bottom))' }}
       >
         {toasts.map((t) => (
           <div key={t.id} className={`pointer-events-auto flex max-w-sm animate-rise items-center gap-4 rounded-full border bg-raised/95 py-2.5 pl-5 pr-3 text-sm shadow-lift backdrop-blur ${tone[t.type]}`}>

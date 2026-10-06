@@ -32,18 +32,17 @@ const login = async (page) => { await page.goto(B + '/login'); await page.getByL
   await page.getByPlaceholder('Add a note (optional)').fill('Landing test'); await page.getByRole('button', { name: 'Save expense' }).click()
   await page.waitForURL(`**/groups/${ids.FAM}`)
   for (const t of [100, 500, 1200, 2500]) { await page.waitForTimeout(t === 100 ? 100 : t - 100); s = await state(); check(`landing @${t}ms: no sideways offset, at top`, s.wx === 0 && s.wy === 0 && s.docW <= s.vw, JSON.stringify(s)) }
-  // floating bar anchored to --app-h
+  // floating bar sits at the bottom of the visible area
   await page.goto(`${B}/groups`); await page.waitForSelector('text=Your wallets'); await page.waitForTimeout(600)
-  const g = await page.evaluate(() => { const n = document.querySelector('nav[aria-label=Main]').getBoundingClientRect(); return { appH: getComputedStyle(document.documentElement).getPropertyValue('--app-h').trim(), navBottom: Math.round(n.bottom), innerH: innerHeight } })
-  check('--app-h equals the visible height', g.appH === `${g.innerH}px`, JSON.stringify(g))
+  const g = await page.evaluate(() => { const n = document.querySelector('nav[aria-label=Main]').getBoundingClientRect(); const pill = n.height; return { navBottom: Math.round(n.bottom), innerH: innerHeight, pill } })
   check('bottom bar ends exactly at the bottom of the visible area', g.navBottom === g.innerH, JSON.stringify(g))
   // simulated installed iOS app with a short viewport
   const ctx2 = await b.newContext({ viewport: { width: 402, height: 812 }, isMobile: true, hasTouch: true })
   await ctx2.addInitScript(() => { Object.defineProperty(navigator, 'standalone', { value: true }) })
   await ctx2.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort())
   const p2 = await ctx2.newPage(); await login(p2); await p2.waitForSelector('text=Your wallets'); await p2.waitForTimeout(600)
-  const g2 = await p2.evaluate(() => ({ appH: getComputedStyle(document.documentElement).getPropertyValue('--app-h').trim(), navBottom: Math.round(document.querySelector('nav[aria-label=Main]').getBoundingClientRect().bottom), innerH: innerHeight }))
-  check('installed iOS (short viewport): bar stays fully inside the drawable area', g2.appH === '812px' && g2.navBottom === 812, JSON.stringify(g2))
+  const g2 = await p2.evaluate(() => ({ navBottom: Math.round(document.querySelector('nav[aria-label=Main]').getBoundingClientRect().bottom), innerH: innerHeight }))
+  check('short viewport (812): bar stays fully inside the drawable area', g2.navBottom === 812 && g2.innerH === 812, JSON.stringify(g2))
   await ctx2.close()
   console.log(fail ? `== ${fail} FAILED` : '== all passed'); await b.close(); process.exit(fail ? 1 : 0)
 })().catch((e) => { console.error('CRASH', e.message.split('\n')[0]); process.exit(2) })

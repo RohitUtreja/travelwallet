@@ -42,7 +42,7 @@ export default function DebugViewport() {
         clientH: document.documentElement.clientHeight, fixedBottomAt: fb,
         safeTop: cs.paddingTop, safeBottom: cs.paddingBottom,
         standalone: navigator.standalone === true || matchMedia('(display-mode: standalone)').matches,
-        appH: getComputedStyle(document.documentElement).getPropertyValue('--app-h').trim(), units, navBottom: Math.round(document.querySelector('nav[aria-label=Main]')?.getBoundingClientRect().bottom ?? 0),
+        units, navBottom: Math.round(document.querySelector('nav[aria-label=Main]')?.getBoundingClientRect().bottom ?? 0),
         docH: document.documentElement.scrollHeight, docScrollable: document.documentElement.scrollHeight > innerHeight,
       })
     }

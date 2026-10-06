@@ -5,7 +5,6 @@
 @tailwind utilities;
 
 @layer base {
-  :root { --app-h: 100dvh; } /* replaced by the measured value before first paint */
   * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
   html {
     /* Painted over the whole canvas, including the strip Safari leaves above its own toolbar:
@@ -21,7 +20,7 @@
      page as non-scrollable and report a viewport 62px shorter than the screen in the installed app —
      confirmed on device with the viewport lab.) Sideways movement is prevented by clipping overflow
      and allowing only vertical touch panning. */
-  html, body { max-width: 100%; overflow-x: clip; }
+  html, body { max-width: 100%; overflow-x: clip; overscroll-behavior-y: none; }
   body {
     /* +1px keeps the document always scrollable, even on screens that fit exactly (e.g. Add expense),
        so iOS never falls back to the short "non-scrollable page" viewport */
@@ -57,9 +56,3 @@
 }
 
 .pan-x { touch-action: pan-x pan-y; }
-
-/* Everything anchored to the bottom, or filling the screen, is derived from --app-h — never from
-   bottom:0 / inset:0, which follow the browser's reported viewport (iOS reports it wrongly when installed). */
-.app-bottom { top: var(--app-h); transform: translateY(-100%); }
-.app-toast { top: calc(var(--app-h) - 6.5rem - env(safe-area-inset-bottom)); transform: translateY(-100%); }
-.fill-screen { top: 0; left: 0; width: 100%; height: var(--app-h); }

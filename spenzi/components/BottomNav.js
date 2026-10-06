@@ -9,8 +9,8 @@ const tabBase =
 
 /**
  * Floating "island" tab bar: a rounded glass pill that hovers above the bottom edge (and above the
- * home indicator). Anchored with .app-bottom (see globals.css), so it adapts to Safari's toolbar and
- * to the installed app alike; the wrapper ignores touches so only the pill is interactive.
+ * home indicator). Plain fixed positioning: it follows Safari's toolbar and the installed app's real
+ * bottom edge. The wrapper ignores touches so only the pill is interactive.
  */
 export default function BottomNav() {
   const path = usePathname()
@@ -28,7 +28,7 @@ export default function BottomNav() {
     )
   }
   return (
-    <nav aria-label="Main" className="app-bottom safe-bottom-island pointer-events-none fixed inset-x-0 z-40 px-4">
+    <nav aria-label="Main" className="safe-bottom-island pointer-events-none fixed inset-x-0 bottom-0 z-40 px-4">
       <div className="pointer-events-auto mx-auto flex h-16 max-w-sm items-center gap-1 rounded-full border border-gold/25 bg-raised/95 px-2 shadow-lift backdrop-blur-xl">
         {tab('/groups', 'Wallets', Wallet)}
         <Link
