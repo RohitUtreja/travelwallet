@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Form, RadioGroup, Radio, Label } from 'react-aria-components'
 import { LogOut, Lock, Check } from 'lucide-react'
@@ -66,6 +66,7 @@ export default function ProfilePage() {
   const [lockOn, setLockOn] = useState(false)
   const [setup, setSetup] = useState(false)
   const [confirmOff, setConfirmOff] = useState(false)
+  const taps = useRef({ n: 0, t: 0 })
 
   useEffect(() => { setLockOn(store.isEnabled()) }, [store])
   useEffect(() => {
@@ -81,6 +82,20 @@ export default function ProfilePage() {
     setPending(false)
     if (error) show(error.message, { type: 'error' }); else show('Profile saved', { type: 'success' })
   }
+  // Hidden: tap the footer 5 times to toggle the viewport debug panel (for diagnosing device layout).
+  function footerTap() {
+    const now = Date.now()
+    taps.current = { n: now - taps.current.t < 1500 ? taps.current.n + 1 : 1, t: now }
+    if (taps.current.n < 5) return
+    taps.current.n = 0
+    try {
+      const on = localStorage.getItem('fw:debug') === '1'
+      localStorage.setItem('fw:debug', on ? '0' : '1')
+      window.dispatchEvent(new Event('fw:debug-toggle'))
+      show(on ? 'Debug panel off' : 'Debug panel on', { type: 'info' })
+    } catch { /* private mode */ }
+  }
+
   async function signOut() {
     await createClient().auth.signOut()
     router.replace('/login')
@@ -120,7 +135,7 @@ export default function ProfilePage() {
         </section>
 
         <Button variant="danger" size="lg" onPress={signOut}><LogOut aria-hidden size={16} /> Sign out</Button>
-        <p className="text-center text-xs text-faint">FamilyWallet</p>
+        <button type="button" onClick={footerTap} className="mx-auto text-center text-xs text-faint outline-none">FamilyWallet</button>
       </main>
 
       <PinSetup store={store} isOpen={setup} onOpenChange={setSetup} onDone={() => setLockOn(true)} />
