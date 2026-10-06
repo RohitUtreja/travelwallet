@@ -14,12 +14,11 @@
     text-rendering: optimizeLegibility;
     overflow-wrap: anywhere; /* user text (long words, URLs) must never widen the page */
   }
-  /* The window never scrolls (iOS can't pan or rubber-band it sideways); #app-scroll does. */
+  /* The window never scrolls (iOS can't pan or rubber-band it sideways); #app-scroll does.
+     Note: body is NOT position:fixed — on iOS standalone that shrank the viewport and left a
+     gap under the bottom bar. */
   html, body { height: 100%; max-width: 100%; overflow: hidden; overscroll-behavior: none; }
   body {
-    position: fixed;
-    inset: 0;
-    width: 100%;
     background:
       radial-gradient(120% 60% at 50% -10%, rgba(201,169,106,0.10), transparent 60%),
       #0b0a09;
