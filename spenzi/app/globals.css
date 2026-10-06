@@ -5,9 +5,12 @@
 @tailwind utilities;
 
 @layer base {
+  :root { --app-h: 100dvh; } /* replaced by the measured value before first paint */
   * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
   html {
-    background: #0b0a09;
+    /* Painted over the whole canvas, including the strip Safari leaves above its own toolbar:
+       keep it identical to the bottom bar (shell) so no gap is visible. */
+    background: #12100e;
     color: #f4efe6;
     font-family: Inter, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -24,8 +27,11 @@
       #0b0a09;
   }
   .app-scroll {
-    position: fixed; /* pinned to the screen, independent of any wrapper's height */
-    inset: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--app-h); /* the real visible height, measured in lib/appHeight.js */
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -54,6 +60,13 @@
   .hairline { height: 1px; background: linear-gradient(90deg, transparent, rgba(201,169,106,0.55), transparent); }
   .safe-top { padding-top: max(1.25rem, env(safe-area-inset-top)); }
   .safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+  .safe-bottom-nav { padding-bottom: max(0.25rem, env(safe-area-inset-bottom)); }
 }
 
 .pan-x { touch-action: pan-x pan-y; }
+
+/* Everything anchored to the bottom, or filling the screen, is derived from --app-h — never from
+   bottom:0 / inset:0, which follow the browser's reported viewport (iOS reports it wrongly when installed). */
+.app-bottom { top: var(--app-h); transform: translateY(-100%); }
+.app-toast { top: calc(var(--app-h) - 6.5rem - env(safe-area-inset-bottom)); transform: translateY(-100%); }
+.fill-screen { top: 0; left: 0; width: 100%; height: var(--app-h); }

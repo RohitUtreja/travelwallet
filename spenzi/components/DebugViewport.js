@@ -31,11 +31,18 @@ export default function DebugViewport() {
       document.body.appendChild(fixedBottom)
       const fb = Math.round(fixedBottom.getBoundingClientRect().bottom)
       fixedBottom.remove()
+      const units = {}
+      for (const u of ['vh', 'lvh', 'svh', 'dvh']) {
+        const t = document.createElement('div')
+        t.style.cssText = `position:fixed;top:0;left:0;width:1px;height:100${u};visibility:hidden`
+        document.body.appendChild(t); units[u] = Math.round(t.getBoundingClientRect().height); t.remove()
+      }
       setInfo({
         innerH: innerHeight, vvH: Math.round(window.visualViewport?.height ?? 0), screenH: screen.height,
         clientH: document.documentElement.clientHeight, fixedBottomAt: fb,
         safeTop: cs.paddingTop, safeBottom: cs.paddingBottom,
         standalone: navigator.standalone === true || matchMedia('(display-mode: standalone)').matches,
+        appH: getComputedStyle(document.documentElement).getPropertyValue('--app-h').trim(), units, navBottom: Math.round(document.querySelector('nav[aria-label=Main]')?.getBoundingClientRect().bottom ?? 0),
         app: Math.round(document.getElementById('app-scroll')?.getBoundingClientRect().height ?? 0),
       })
     }

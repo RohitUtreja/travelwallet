@@ -10,7 +10,7 @@ export function Sheet({ isOpen, onOpenChange, title, children, footer }) {
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       isDismissable
-      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/65 backdrop-blur-sm data-[entering]:animate-rise"
+      className="fill-screen fixed z-[60] flex items-end justify-center bg-black/65 backdrop-blur-sm data-[entering]:animate-rise"
     >
       <Modal className="w-full max-w-lg outline-none">
         <Dialog className="flex max-h-[88dvh] flex-col rounded-t-[2rem] border border-b-0 border-line bg-raised outline-none">
