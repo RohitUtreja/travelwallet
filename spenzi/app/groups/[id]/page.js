@@ -45,19 +45,20 @@ export default function WalletPage() {
 
   return (
     <div className="page pb-32">
-      <PageHeader back="/groups" eyebrow={`${TYPE_LABEL[group.type]} · ${group.currency}`} title={group.name}>
-        {w.canWrite && (
-          <LinkButton href={`/groups/${id}/add`} size="sm" className="hidden sm:inline-flex"><Plus aria-hidden size={16} /> Add</LinkButton>
-        )}
-      </PageHeader>
-
       <Tabs selectedKey={tab} onSelectionChange={setTab}>
-        <TabList aria-label="Wallet sections" className="sticky top-[88px] z-20 bg-shell/90 backdrop-blur-xl">
-          <Tab id="overview">Overview</Tab>
-          <Tab id="expenses">Expenses</Tab>
-          {isSplit && <Tab id="balances">Balances</Tab>}
-          <Tab id="manage">{group.type === 'personal' ? 'Settings' : 'Manage'}</Tab>
-        </TabList>
+        <div className="sticky top-0 z-30 bg-shell">
+          <PageHeader back="/groups" eyebrow={`${TYPE_LABEL[group.type]} · ${group.currency}`} title={group.name} sticky={false}>
+            {w.canWrite && (
+              <LinkButton href={`/groups/${id}/add`} size="sm" className="hidden sm:inline-flex"><Plus aria-hidden size={16} /> Add</LinkButton>
+            )}
+          </PageHeader>
+          <TabList aria-label="Wallet sections" className="bg-shell/90 backdrop-blur-xl">
+            <Tab id="overview">Overview</Tab>
+            <Tab id="expenses">Expenses</Tab>
+            {isSplit && <Tab id="balances">Balances</Tab>}
+            <Tab id="manage">{group.type === 'personal' ? 'Settings' : 'Manage'}</Tab>
+          </TabList>
+        </div>
 
         {(tab === 'overview' || tab === 'expenses') && (
           <div className="px-5 pt-5"><MonthNav value={month} onChange={setMonth} /></div>

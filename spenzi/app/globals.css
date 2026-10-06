@@ -14,14 +14,24 @@
     text-rendering: optimizeLegibility;
     overflow-wrap: anywhere; /* user text (long words, URLs) must never widen the page */
   }
-  html, body { max-width: 100%; overflow-x: clip; }
+  /* The window never scrolls (iOS can't pan or rubber-band it sideways); #app-scroll does. */
+  html, body { height: 100%; max-width: 100%; overflow: hidden; overscroll-behavior: none; }
   body {
-    min-height: 100dvh;
-    overflow-x: hidden; /* fallback for browsers without `clip` */
-    touch-action: pan-y pinch-zoom; /* no sideways panning on touch devices */
+    position: fixed;
+    inset: 0;
+    width: 100%;
     background:
       radial-gradient(120% 60% at 50% -10%, rgba(201,169,106,0.10), transparent 60%),
       #0b0a09;
+  }
+  .app-scroll {
+    position: fixed; /* pinned to the screen, independent of any wrapper's height */
+    inset: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y pinch-zoom; /* no sideways panning; opt back in with .pan-x */
   }
   ::-webkit-scrollbar { width: 0; height: 0; }
   :focus-visible { outline: 2px solid #e4cf9e; outline-offset: 2px; }
