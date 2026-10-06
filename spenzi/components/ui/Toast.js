@@ -30,7 +30,7 @@ export function ToastProvider({ children }) {
       <div
         role="status"
         aria-live="polite"
-        className="pointer-events-none fixed inset-x-0 z-[80] flex flex-col items-center gap-2 px-4"
+        className="fix-toast pointer-events-none fixed inset-x-0 z-[80] flex flex-col items-center gap-2 px-4"
         style={{ bottom: 'calc(6.5rem + env(safe-area-inset-bottom))' }}
       >
         {toasts.map((t) => (

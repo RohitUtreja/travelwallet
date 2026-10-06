@@ -60,3 +60,13 @@
 }
 
 .pan-x { touch-action: pan-x pan-y; }
+
+/* Installed PWA on iOS: the layout viewport is reported shorter than the real screen (62px on a
+   notch iPhone), so bottom-anchored things stopped above the screen edge. 100lvh is the full
+   height; bottom-anchored layers are shifted down by the difference. Safari (browser) is untouched. */
+@media (display-mode: standalone) {
+  .app-scroll { bottom: auto !important; height: 100lvh !important; }
+  .fix-bottom { bottom: calc(100% - 100lvh) !important; }
+  .fix-toast { bottom: calc(6.5rem + env(safe-area-inset-bottom) + 100% - 100lvh) !important; }
+  .fill-screen { bottom: auto !important; height: 100lvh !important; }
+}

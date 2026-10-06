@@ -49,7 +49,7 @@ export default function LockGate({ children }) {
     <>
       <div inert={locked ? '' : undefined} aria-hidden={locked || undefined}>{children}</div>
       {ready && locked && (
-        <div role="dialog" aria-modal="true" aria-label="App locked" className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-ink px-8">
+        <div role="dialog" aria-modal="true" aria-label="App locked" className="fill-screen fixed inset-0 z-[100] flex flex-col items-center justify-center bg-ink px-8">
           <Lock aria-hidden className="mb-6 text-gold" size={28} strokeWidth={1.5} />
           <h1 className="display mb-1 text-3xl font-semibold">FamilyWallet</h1>
           <p className="mb-8 text-sm text-muted">Enter your PIN</p>
