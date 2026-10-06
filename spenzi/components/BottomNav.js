@@ -19,7 +19,7 @@ export default function BottomNav() {
     )
   }
   return (
-    <nav aria-label="Main" className="fix-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line bg-shell">
+    <nav aria-label="Main" className="app-bottom fixed inset-x-0 z-40 border-t border-line bg-shell">
       <div className="mx-auto flex h-[68px] max-w-lg items-center safe-bottom-nav box-content">
         {tab('/groups', 'Wallets', Wallet)}
         <Link

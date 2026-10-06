@@ -34,5 +34,22 @@ const check = (n, c, x = '') => { if (!c) fail++; console.log(`${c ? 'PASS' : 'F
   await page.waitForURL(`**/groups/${ids.FAM}`); 
   for (const t of [100, 500, 1200, 2500]) { await page.waitForTimeout(t === 100 ? 100 : t - 100); s = await state(); check(`landing @${t}ms: no sideways offset, at top`, s.wx === 0 && s.wy === 0 && s.ax === 0 && s.ay === 0 && s.aw <= s.acw, JSON.stringify(s)) }
   await page.screenshot({ path: __dirname + '/shots/lock-landed.png' })
+
+  // ── bottom bar is anchored to the measured height (--app-h): no gap in a normal browser ──
+  await page.goto(`${B}/groups`); await page.waitForSelector('text=Your wallets'); await page.waitForTimeout(600)
+  const geo = () => page.evaluate(() => { const nav = document.querySelector('nav[aria-label=Main]').getBoundingClientRect(); const sc = document.getElementById('app-scroll').getBoundingClientRect(); return { appH: getComputedStyle(document.documentElement).getPropertyValue('--app-h').trim(), navBottom: Math.round(nav.bottom), scrollBottom: Math.round(sc.bottom), innerH: innerHeight } })
+  let g = await geo(); check('browser: --app-h equals the visible height', g.appH === `${g.innerH}px`, JSON.stringify(g))
+  check('browser: bottom bar and scroll area end exactly at the bottom', g.navBottom === g.innerH && g.scrollBottom === g.innerH, JSON.stringify(g))
+
+  // ── simulated installed iOS app: viewport reported 62px shorter than the real screen ──
+  const ctx2 = await b.newContext({ viewport: { width: 402, height: 812 }, isMobile: true, hasTouch: true })
+  await ctx2.addInitScript(() => { Object.defineProperty(navigator, 'standalone', { value: true }); Object.defineProperty(screen, 'width', { value: 402 }); Object.defineProperty(screen, 'height', { value: 874 }) })
+  await ctx2.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort())
+  const p2 = await ctx2.newPage(); await p2.goto(`${B}/login`); await p2.getByLabel('Email').fill('rohit@family.test'); await p2.getByLabel('Password', { exact: true }).fill('pw'); await p2.getByRole('button', { name: 'Sign in' }).click()
+  await p2.waitForSelector('text=Your wallets'); await p2.waitForTimeout(600)
+  const g2 = await p2.evaluate(() => ({ appH: getComputedStyle(document.documentElement).getPropertyValue('--app-h').trim(), navBottom: Math.round(document.querySelector('nav[aria-label=Main]').getBoundingClientRect().bottom), innerH: innerHeight }))
+  check('installed iOS: --app-h is the full screen (874), not the short viewport (812)', g2.appH === '874px' && g2.innerH === 812, JSON.stringify(g2))
+  check('installed iOS: bottom bar ends at the real screen bottom', g2.navBottom === 874, JSON.stringify(g2))
+  await ctx2.close()
   console.log(fail ? `== ${fail} FAILED` : '== all passed'); await b.close(); process.exit(fail ? 1 : 0)
 })().catch((e) => { console.error('CRASH', e.message.split('\n')[0]); process.exit(2) })

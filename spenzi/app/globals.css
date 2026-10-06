@@ -5,6 +5,7 @@
 @tailwind utilities;
 
 @layer base {
+  :root { --app-h: 100dvh; } /* replaced by the measured value before first paint */
   * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
   html {
     /* Painted over the whole canvas, including the strip Safari leaves above its own toolbar:
@@ -26,8 +27,11 @@
       #0b0a09;
   }
   .app-scroll {
-    position: fixed; /* pinned to the screen, independent of any wrapper's height */
-    inset: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--app-h); /* the real visible height, measured in lib/appHeight.js */
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -61,12 +65,8 @@
 
 .pan-x { touch-action: pan-x pan-y; }
 
-/* Installed PWA on iOS: the layout viewport is reported shorter than the real screen (62px on a
-   notch iPhone), so bottom-anchored things stopped above the screen edge. 100lvh is the full
-   height; bottom-anchored layers are shifted down by the difference. Safari (browser) is untouched. */
-@media (display-mode: standalone) {
-  .app-scroll { bottom: auto !important; height: 100lvh !important; }
-  .fix-bottom { bottom: calc(100% - 100lvh) !important; }
-  .fix-toast { bottom: calc(6.5rem + env(safe-area-inset-bottom) + 100% - 100lvh) !important; }
-  .fill-screen { bottom: auto !important; height: 100lvh !important; }
-}
+/* Everything anchored to the bottom, or filling the screen, is derived from --app-h — never from
+   bottom:0 / inset:0, which follow the browser's reported viewport (iOS reports it wrongly when installed). */
+.app-bottom { top: var(--app-h); transform: translateY(-100%); }
+.app-toast { top: calc(var(--app-h) - 6.5rem - env(safe-area-inset-bottom)); transform: translateY(-100%); }
+.fill-screen { top: 0; left: 0; width: 100%; height: var(--app-h); }

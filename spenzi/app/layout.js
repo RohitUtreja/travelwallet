@@ -1,5 +1,6 @@
 import './globals.css'
 import Providers from './providers'
+import { appHeight } from '@/lib/appHeight'
 
 export const metadata = {
   title: 'FamilyWallet',
@@ -23,6 +24,10 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <script
+          // sets --app-h before first paint so the layout never flashes at the wrong height
+          dangerouslySetInnerHTML={{ __html: `try{document.documentElement.style.setProperty('--app-h',(${appHeight.toString()})()+'px')}catch(e){}` }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `if ('serviceWorker' in navigator) { window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function (e) { console.warn('SW registration failed:', e) }) }) }`,
