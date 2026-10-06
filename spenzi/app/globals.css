@@ -12,10 +12,13 @@
     font-family: Inter, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    overflow-wrap: anywhere; /* user text (long words, URLs) must never widen the page */
   }
+  html, body { max-width: 100%; overflow-x: clip; }
   body {
     min-height: 100dvh;
-    overflow-x: hidden;
+    overflow-x: hidden; /* fallback for browsers without `clip` */
+    touch-action: pan-y pinch-zoom; /* no sideways panning on touch devices */
     background:
       radial-gradient(120% 60% at 50% -10%, rgba(201,169,106,0.10), transparent 60%),
       #0b0a09;
@@ -28,7 +31,7 @@
 }
 
 @layer components {
-  .page { @apply min-h-dvh flex flex-col max-w-lg mx-auto bg-shell relative; }
+  .page { @apply min-h-dvh flex flex-col max-w-lg mx-auto bg-shell relative; overflow-x: clip; }
   .glass {
     background: linear-gradient(180deg, rgba(255,248,235,0.055), rgba(255,248,235,0.02));
     border: 1px solid rgba(233,215,180,0.14);
@@ -43,3 +46,5 @@
   .safe-top { padding-top: max(1.25rem, env(safe-area-inset-top)); }
   .safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
 }
+
+.pan-x { touch-action: pan-x pan-y; }

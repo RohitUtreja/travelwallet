@@ -22,7 +22,7 @@ export default function CategoryPicker({ value, onChange, recent = [] }) {
     <>
       <RadioGroup value={value} onChange={onChange} className="flex flex-col gap-2.5">
         <Label className="eyebrow">Category</Label>
-        <div className="relative -mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
+        <div className="pan-x relative -mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
           {quick.map((id) => {
             const { label, icon: Icon } = getCategory(id)
             return (

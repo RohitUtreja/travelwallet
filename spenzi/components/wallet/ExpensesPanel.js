@@ -85,7 +85,7 @@ export default function ExpensesPanel({ group, members, user, isAdmin, canWrite,
       <div className="flex items-center gap-2">
         <SearchField value={query} onChange={setQuery} aria-label="Search expenses" className="relative flex-1">
           <Search aria-hidden size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-faint" />
-          <Input placeholder="Search" className="h-11 w-full rounded-full border border-line bg-white/[0.04] pl-10 pr-4 text-sm text-ivory outline-none placeholder:text-faint data-[focused]:border-gold/70" />
+          <Input placeholder="Search" className="h-11 w-full rounded-full border border-line bg-white/[0.04] pl-10 pr-4 text-base text-ivory outline-none placeholder:text-faint data-[focused]:border-gold/70" />
         </SearchField>
         <IconButton label="Export this month as CSV" isDisabled={!filtered.length} onPress={exportCSV}><Download size={18} /></IconButton>
       </div>

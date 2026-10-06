@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { getCategory } from '@/lib/categories'
 import { TOTAL_KEY, budgetStatus } from '@/lib/budgets'
 import { buildInsights } from '@/lib/insights'
-import { formatCurrency, formatMonth, monthRange } from '@/lib/utils'
+import { formatCurrency, formatMonth, monthRange, fitFontSize } from '@/lib/utils'
 import { Button } from '../ui/Button'
 import { Progress } from '../ui/Progress'
 import { Skeleton } from '../ui/Skeleton'
@@ -65,9 +65,9 @@ export default function Overview({ group, month, isAdmin, reloadKey }) {
     <div className="flex flex-col gap-7 px-5 py-6">
       {/* Hero */}
       <section className="card relative overflow-hidden p-6 text-center">
-        <div aria-hidden className="pointer-events-none absolute -top-16 left-1/2 h-40 w-64 -translate-x-1/2 rounded-full bg-gold/15 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(70% 55% at 50% 0%, rgba(201,169,106,0.16), transparent 70%)' }} />
         <p className="eyebrow">Spent in {formatMonth(year, m, 'long')}</p>
-        <p className="display num mt-2 text-[52px] font-semibold leading-none text-ivory">{fmt(total)}</p>
+        <p className="display num mt-2 font-semibold leading-none text-ivory" style={{ fontSize: fitFontSize(fmt(total), 52, 270) }}>{fmt(total)}</p>
         <div className="hairline mx-auto my-4 w-28" />
         <p className="flex items-center justify-center gap-3 text-sm text-muted">
           <span>{summary.count} {summary.count == 1 ? 'expense' : 'expenses'}</span>

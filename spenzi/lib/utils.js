@@ -173,3 +173,14 @@ export function avatarBg(name) {
 export function safeNext(next) {
   return typeof next === 'string' && next.startsWith('/') && !next.startsWith('//') && !next.includes('\\') ? next : '/groups'
 }
+
+// ─── Layout ──────────────────────────────────────────────────────────────────
+
+/**
+ * Largest font size (<= max) at which `text` fits in `available` px. Digits in the display
+ * serif are ~0.56em wide; used for big money figures so 9-digit amounts never overflow.
+ */
+export function fitFontSize(text, max, available, min = 24) {
+  const len = Math.max(String(text ?? '').length, 1)
+  return Math.max(min, Math.min(max, Math.floor(available / (len * 0.56))))
+}

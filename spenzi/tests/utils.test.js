@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { safeNext, parseAmount, simplifyDebts, computeBalances, monthRange, shiftMonth, toISODate } from '../lib/utils'
+import { fitFontSize, safeNext, parseAmount, simplifyDebts, computeBalances, monthRange, shiftMonth, toISODate } from '../lib/utils'
 
 describe('parseAmount', () => {
   it.each([
@@ -60,4 +60,15 @@ describe('safeNext', () => {
   it.each(['//evil.com', 'https://evil.com', '/\\evil.com', 'javascript:alert(1)', '', null, undefined])('rejects %s', (v) => {
     expect(safeNext(v)).toBe('/groups')
   })
+})
+
+describe('fitFontSize', () => {
+  it('keeps the maximum for short numbers', () => expect(fitFontSize('1,250.50', 64, 340)).toBe(Math.min(64, Math.floor(340 / (8 * 0.56)))))
+  it('shrinks for long numbers but never below the minimum', () => {
+    const big = fitFontSize('999,999,999.99', 64, 330)
+    expect(big).toBeLessThan(48)
+    expect(big * 0.56 * 14).toBeLessThanOrEqual(330)
+    expect(fitFontSize('9'.repeat(40), 64, 300)).toBe(24)
+  })
+  it('handles empty input', () => expect(fitFontSize('', 64, 300)).toBe(64))
 })
